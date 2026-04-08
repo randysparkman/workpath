@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Readiness Profile — For Organizations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:    #0C2D48;
+      --navy-mid: #1A4A6B;
+      --gold:    #C9983A;
+      --gold-lt: #E8B95A;
+      --light:   #F7F8FA;
+      --mid:     #E4E9ED;
+      --text:    #1C2B3A;
+      --muted:   #6B7F8E;
+      --white:   #FFFFFF;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: var(--white);
+      line-height: 1.6;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: var(--navy);
+      padding: 96px 64px 80px;
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -160px; left: 50%;
+      transform: translateX(-50%);
+      width: 700px; height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(26,107,154,0.3) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-icon {
+      width: 64px; height: 64px;
+      background: #2A5A3A;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 28px;
+      position: relative; z-index: 1;
+    }
+
+    .hero-icon svg { width: 28px; height: 28px; }
+
+    .hero-eyebrow {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+      position: relative; z-index: 1;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.2rem, 4vw, 3.4rem);
+      font-weight: 400;
+      color: var(--white);
+      line-height: 1.15;
+      max-width: 680px;
+      margin: 0 auto 24px;
+      position: relative; z-index: 1;
+    }
+
+    .hero-sub {
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: rgba(255,255,255,0.68);
+      max-width: 560px;
+      margin: 0 auto 40px;
+      line-height: 1.75;
+      position: relative; z-index: 1;
+    }
+
+    .hero-stats {
+      display: inline-flex;
+      gap: 0;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative; z-index: 1;
+    }
+
+    .hero-stat {
+      padding: 14px 32px;
+      text-align: center;
+      border-right: 1px solid rgba(255,255,255,0.15);
+    }
+    .hero-stat:last-child { border-right: none; }
+
+    .hero-stat-num {
+      display: block;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--gold);
+      font-family: 'Playfair Display', serif;
+    }
+    .hero-stat-label {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* ── SECTION BASE ── */
+    section { padding: 88px 64px; }
+
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    .section-heading {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+      font-weight: 400;
+      color: var(--navy);
+      margin-bottom: 20px;
+      line-height: 1.25;
+    }
+
+    .section-body {
+      font-size: 1.02rem;
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 580px;
+    }
+
+    /* ── OPPORTUNITY ── */
+    #opportunity {
+      background: var(--white);
+      text-align: center;
+    }
+
+    .opp-intro {
+      max-width: 640px;
+      margin: 0 auto 56px;
+    }
+
+    .opp-intro .section-heading {
+      max-width: 100%;
+    }
+
+    .opp-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      background: var(--mid);
+      border-radius: 10px;
+      overflow: hidden;
+      max-width: 960px;
+      margin: 0 auto 40px;
+    }
+
+    .opp-card {
+      background: var(--light);
+      padding: 40px 32px;
+      text-align: left;
+    }
+
+    .opp-card h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      color: var(--navy);
+      font-weight: 400;
+      margin-bottom: 14px;
+    }
+
+    .opp-card p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .opp-bridge {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-style: italic;
+      color: var(--navy);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 860px) {
+      .opp-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── WHAT IT IS ── */
+    #what {
+      background: var(--light);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .what-quote {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1.35rem;
+      color: var(--navy);
+      line-height: 1.6;
+      padding-left: 24px;
+      border-left: 3px solid var(--gold);
+    }
+
+    /* ── THREE TIERS ── */
+    #tiers { background: var(--white); }
+
+    .tiers-intro {
+      max-width: 640px;
+      margin: 0 auto 56px;
+      text-align: center;
+    }
+
+    .tiers-intro .section-label { text-align: center; }
+    .tiers-intro .section-heading { max-width: 100%; }
+
+    .tier-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      background: var(--mid);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .tier-card {
+      background: var(--white);
+      padding: 40px 32px;
+    }
+
+    .tier-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.8rem;
+      color: var(--mid);
+      font-weight: 400;
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+
+    .tier-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    .tier-card h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      color: var(--navy);
+      margin-bottom: 12px;
+      font-weight: 400;
+    }
+
+    .tier-card p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    /* ── DIMENSIONS ── */
+    #dimensions {
+      background: var(--navy);
+      text-align: center;
+    }
+
+    #dimensions .section-heading { color: var(--white); }
+
+    .dims-intro {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.6);
+      max-width: 560px;
+      margin: 0 auto 56px;
+      line-height: 1.8;
+    }
+
+    .dims-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .dim-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 36px 28px;
+      text-align: left;
+    }
+
+    .dim-card-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .dim-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+      flex-shrink: 0;
+    }
+
+    .dim-name {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .dim-card h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--white);
+      font-weight: 400;
+      margin-bottom: 12px;
+    }
+
+    .dim-card p {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.75;
+    }
+
+    .levels {
+      display: flex;
+      gap: 6px;
+      margin-top: 20px;
+    }
+
+    .level {
+      flex: 1;
+      padding: 5px 0;
+      text-align: center;
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.4);
+    }
+
+    /* ── WHAT HR GETS ── */
+    #output {
+      background: var(--light);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+
+    .output-items {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .output-item {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 20px 22px;
+      background: var(--white);
+      border-radius: 6px;
+      border-left: 3px solid var(--gold);
+    }
+
+    .output-item-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .output-item-text strong {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 3px;
+    }
+
+    .output-item-text span {
+      font-size: 0.83rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── CTA ── */
+    #contact {
+      background: var(--white);
+      text-align: center;
+      padding: 96px 64px;
+      border-top: 1px solid var(--mid);
+    }
+
+    #contact .section-heading { margin: 8px auto 16px; }
+
+    #contact .section-body {
+      margin: 0 auto 40px;
+      text-align: center;
+    }
+
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px 32px;
+      background: var(--navy);
+      color: var(--white);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 4px;
+      letter-spacing: 0.02em;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .cta-btn:hover { background: var(--navy-mid); transform: translateY(-1px); }
+
+    footer {
+      padding: 24px 64px;
+      background: var(--navy);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    footer p { font-size: 0.78rem; color: rgba(255,255,255,0.3); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 860px) {
+      section { padding: 64px 28px; }
+      .hero { padding: 72px 28px 64px; }
+      #what, #output { grid-template-columns: 1fr; gap: 40px; }
+      .tier-list, .dims-grid { grid-template-columns: 1fr; }
+      .hero-stats { flex-direction: column; }
+      footer { flex-direction: column; gap: 8px; text-align: center; padding: 20px 28px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#C9983A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+        <polyline points="2 17 12 22 22 17"/>
+        <polyline points="2 12 12 17 22 12"/>
+      </svg>
+    </div>
+    <p class="hero-eyebrow">For Anyone Measuring Advantage</p>
+    <h1>A New Way to Measure AI Readiness</h1>
+    <p class="hero-sub">Not a quiz. Not a certification. A structured, scenario-based assessment that reveals how your people actually think when AI is part of the work.</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-num">15</span>
+        <span class="hero-stat-label">Scenarios</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">3</span>
+        <span class="hero-stat-label">Dimensions</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">&lt;30</span>
+        <span class="hero-stat-label">Minutes</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- THE OPPORTUNITY -->
+  <section id="opportunity">
+    <div class="opp-intro">
+      <p class="section-label">The Opportunity</p>
+      <h2 class="section-heading">AI readiness is already taking shape. The question is whether you can see it.</h2>
+    </div>
+    <div class="opp-grid">
+      <div class="opp-card">
+        <h3>For the Individual</h3>
+        <p>You're already developing instincts for how to work with AI — when to trust it, when to push back, how to direct it toward something useful. But without a clear picture of where you stand, you can't leverage your strengths or close your gaps with any precision. You're advancing, but you don't know how far you've come.</p>
+      </div>
+      <div class="opp-card">
+        <h3>For the Organization</h3>
+        <p>Your people are further along than you think — or they need development you haven't targeted yet. Either way, you're making AI investments without a clear view of the readiness you already have. You can't capitalize on what you can't see, and you can't develop what you can't measure.</p>
+      </div>
+      <div class="opp-card">
+        <h3>For the Developer</h3>
+        <p>Whether you're a university, a training program, or a workforce agency — your job is to build AI readiness in people. But right now you have no credible way to show where someone started, how far they've come, or what your program actually produced. The work is real. The evidence isn't.</p>
+      </div>
+    </div>
+    <p class="opp-bridge">The AI Readiness Profile makes it visible.</p>
+  </section>
+
+  <!-- WHAT IT IS -->
+  <section id="what">
+    <div>
+      <p class="section-label">What It Is</p>
+      <h2 class="section-heading">A readiness profile, not a test score.</h2>
+      <p class="section-body">The AI Readiness Profile places respondents inside realistic workplace situations and listens for how they think. There are no right answers and no trick questions. The result is a personalized written profile — not a pass/fail grade, but a clear picture of where someone is and what their next growth looks like.</p>
+      <p class="section-body" style="margin-top:16px;">It adapts to job role and work context, so what an entry-level analyst sees is calibrated differently than what a senior project manager sees.</p>
+    </div>
+    <div>
+      <p class="what-quote">"We're not testing what people know about AI — we're listening for how they think when AI tools are part of the picture."</p>
+    </div>
+  </section>
+
+  <!-- THREE TIERS -->
+  <section id="tiers">
+    <div class="tiers-intro">
+      <p class="section-label">How It Works</p>
+      <h2 class="section-heading">Three tiers. Each one goes deeper.</h2>
+    </div>
+    <div class="tier-list">
+      <div class="tier-card">
+        <div class="tier-number">01</div>
+        <p class="tier-label">Baseline</p>
+        <h3>Everyday Situations</h3>
+        <p>Five scenarios drawn from common workplace moments — the kind where AI tools show up in ordinary work. These establish how someone thinks about AI when it's just part of getting something done.</p>
+      </div>
+      <div class="tier-card">
+        <div class="tier-number">02</div>
+        <p class="tier-label">Contextualized</p>
+        <h3>Role-Specific Work</h3>
+        <p>Five scenarios grounded in the respondent's actual work context — the tasks, decisions, and situations they'd encounter in their specific role. The profile adapts based on job type.</p>
+      </div>
+      <div class="tier-card">
+        <div class="tier-number">03</div>
+        <p class="tier-label">Adaptive</p>
+        <h3>Where It Gets Interesting</h3>
+        <p>Five scenarios generated from the respondent's earlier answers — probing areas where their thinking was most revealing or where the picture needs more depth. No two profiles are identical.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIMENSIONS -->
+  <section id="dimensions">
+    <p class="section-label" style="color: var(--gold);">What We Measure</p>
+    <h2 class="section-heading">Three dimensions of AI readiness.</h2>
+    <p class="dims-intro">Every response is read across three constructs. Together, they give a complete picture — not just whether someone uses AI, but how well they understand it, integrate it, and reason through it under real conditions.</p>
+    <p style="font-size:0.78rem; color: rgba(255,255,255,0.3); letter-spacing:0.05em; margin-top: -36px; margin-bottom: 56px; text-transform: uppercase;">Grounded in multiple established AI literacy frameworks</p>
+    <div class="dims-grid">
+      <div class="dim-card">
+        <div class="dim-card-top">
+          <div class="dim-dot"></div>
+          <span class="dim-name">Orientation</span>
+        </div>
+        <h3>How well they understand AI</h3>
+        <p>Does the person have an accurate mental model for what AI tools actually do — and don't do? Do they understand why confident output can still be wrong?</p>
+        <div class="levels">
+          <div class="level">Emerging</div>
+          <div class="level">Developing</div>
+          <div class="level">Demonstrating</div>
+        </div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-card-top">
+          <div class="dim-dot"></div>
+          <span class="dim-name">Integration</span>
+        </div>
+        <h3>How effectively they use AI</h3>
+        <p>Can they describe how they'd actually direct AI to get useful output? Do they think in workflows, not just one-off prompts? Do they know what to do with what the AI gives them?</p>
+        <div class="levels">
+          <div class="level">Emerging</div>
+          <div class="level">Developing</div>
+          <div class="level">Demonstrating</div>
+        </div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-card-top">
+          <div class="dim-dot"></div>
+          <span class="dim-name">Judgment</span>
+        </div>
+        <h3>How well they reason under pressure</h3>
+        <p>Do they calibrate their scrutiny to what's at stake? Can they recognize when caution matters more than speed? Do they understand the consequences of getting it wrong?</p>
+        <div class="levels">
+          <div class="level">Emerging</div>
+          <div class="level">Developing</div>
+          <div class="level">Demonstrating</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT HR GETS -->
+  <section id="output">
+    <div>
+      <p class="section-label">The Output</p>
+      <h2 class="section-heading">What you receive for each respondent.</h2>
+      <p class="section-body">Every completed assessment produces a personalized, written profile — generated by AI, grounded in the respondent's own words, and calibrated to their role and work context.</p>
+    </div>
+    <div class="output-items">
+      <div class="output-item">
+        <span class="output-item-icon">📄</span>
+        <div class="output-item-text">
+          <strong>Written Profile Report</strong>
+          <span>A multi-page narrative covering all three dimensions — what the person is doing well, where they have room to grow, and specific next steps.</span>
+        </div>
+      </div>
+      <div class="output-item">
+        <span class="output-item-icon">📊</span>
+        <div class="output-item-text">
+          <strong>Dimension Placement</strong>
+          <span>A clear rating on each of the three dimensions — Orientation, Integration, and Judgment — at Emerging, Developing, or Demonstrating.</span>
+        </div>
+      </div>
+      <div class="output-item">
+        <span class="output-item-icon">🏢</span>
+        <div class="output-item-text">
+          <strong>Organizational Observations</strong>
+          <span>Patterns from the individual's responses that may point to organizational training needs, policy gaps, or workflow opportunities.</span>
+        </div>
+      </div>
+      <div class="output-item">
+        <span class="output-item-icon">🎯</span>
+        <div class="output-item-text">
+          <strong>Highest-Leverage Next Move</strong>
+          <span>One concrete, specific habit or action the respondent can take immediately to advance their readiness.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="contact">
+    <p class="section-label">Get Started</p>
+    <h2 class="section-heading" style="max-width:520px; margin: 8px auto 16px;">Ready to see what your team's AI readiness actually looks like?</h2>
+    <p class="section-body" style="margin: 0 auto 40px; text-align:center;">Pilots are available for teams of any size. Each respondent completes the assessment independently and receives their own profile. Organizational summaries are available for groups.</p>
+    <a href="/cdn-cgi/l/email-protection#3341525d574a40435241585e525d1d4346515f5a5073545e525a5f1d505c5e" class="cta-btn">Contact Randy Sparkman →</a>
+  </section>
+
+  <footer>
+    <p>AI Readiness Profile · rsparkman.net</p>
+    <p>© 2026 Randy Sparkman · 
