@@ -132,7 +132,6 @@ Job role profiles and profile generation prompts live in a separate folder outsi
 ---
 
 ## What's Next
-- [ ] Apply remaining language/layout fixes to brochure (see review notes from 2026-04-10)
-- [ ] Set up `airp.rsparkman.net` custom domain in GoDaddy → Vercel
+- [ ] Set up custom domain (name TBD) in GoDaddy → Vercel
 - [ ] Migrate assessment app from Lovable into `app/`
 - [ ] Move reference assets (job role profiles, prompts) into `workpath/` repo
