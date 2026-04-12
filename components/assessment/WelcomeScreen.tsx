@@ -55,14 +55,19 @@ export function WelcomeScreen({ onStart, preselectedContext }: WelcomeScreenProp
       <FadeIn delay={100}>
         <IconCircle><LayersIcon /></IconCircle>
       </FadeIn>
-      <FadeIn delay={200}>
-        <h1 className="font-serif text-[2.1rem] font-bold text-foreground tracking-[-0.02em] mb-0 leading-[1.2]">
-          An AI Readiness Profile
+      <FadeIn delay={150}>
+        <p className="text-[0.78rem] font-semibold uppercase tracking-[0.14em] text-accent mt-1 mb-3">
+          Intelligence Applied
+        </p>
+      </FadeIn>
+      <FadeIn delay={250}>
+        <h1 className="font-serif text-[2.4rem] font-medium text-foreground tracking-[-0.01em] mb-0 leading-[1.15]">
+          The WorkPath Assessment
         </h1>
       </FadeIn>
-      <FadeIn delay={350}>
+      <FadeIn delay={400}>
         <p className="text-[1.02rem] text-muted-foreground leading-[1.65] max-w-[480px] mx-auto mb-3 mt-6">
-          This is not a test. It's a way to show how you would use AI in real work.
+          A structured, scenario-based assessment that reveals how you actually think when AI is part of your job.
         </p>
         <button
           onClick={() => setShowAbout(!showAbout)}
@@ -101,10 +106,19 @@ export function WelcomeScreen({ onStart, preselectedContext }: WelcomeScreenProp
         </div>
       </FadeIn>
       <FadeIn delay={500}>
-        <div className="flex gap-8 justify-center mb-5 text-[0.85rem] text-muted-foreground">
-          <span>15 questions</span>
-          <span className="text-border-light">·</span>
-          <span>Under 30 minutes</span>
+        <div className="flex justify-center mb-5 border border-border-light rounded-lg overflow-hidden max-w-[380px] mx-auto">
+          <div className="flex-1 py-3 text-center border-r border-border-light">
+            <span className="block font-serif text-[1.3rem] text-accent font-medium">15</span>
+            <span className="block text-[0.7rem] uppercase tracking-[0.08em] text-muted-foreground mt-0.5">Scenarios</span>
+          </div>
+          <div className="flex-1 py-3 text-center border-r border-border-light">
+            <span className="block font-serif text-[1.3rem] text-accent font-medium">3</span>
+            <span className="block text-[0.7rem] uppercase tracking-[0.08em] text-muted-foreground mt-0.5">Dimensions</span>
+          </div>
+          <div className="flex-1 py-3 text-center">
+            <span className="block font-serif text-[1.3rem] text-accent font-medium">&lt;30</span>
+            <span className="block text-[0.7rem] uppercase tracking-[0.08em] text-muted-foreground mt-0.5">Minutes</span>
+          </div>
         </div>
       </FadeIn>
       <FadeIn delay={650}>

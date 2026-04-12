@@ -148,8 +148,8 @@ export function ProfileScreen({
   const p = profile;
   const firstName = userName.trim().split(/\s+/)[0];
   const profileTitle = firstName
-    ? `${firstName}'s AI Readiness Profile`
-    : "AI Readiness Profile";
+    ? `${firstName}'s WorkPath Profile`
+    : "WorkPath Profile";
   const dateStr = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",

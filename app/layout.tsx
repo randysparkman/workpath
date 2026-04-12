@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "The WorkPath Assessment",
-  description: "AI Readiness Assessment — scenario-based evaluation of how you would use artificial intelligence in a work setting.",
+  description: "The WorkPath Assessment — a structured, scenario-based assessment that reveals how you actually think when AI is part of your job.",
 };
 
 export default function RootLayout({

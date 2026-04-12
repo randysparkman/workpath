@@ -28,7 +28,7 @@ export function AppHeader({ onBack, backLabel = "Back", orgName, roleDescription
       </div>
       <div className="text-center">
         <p className="font-serif text-[1.05rem] font-semibold text-foreground tracking-[-0.01em] m-0">
-          AI Readiness Profile
+          The WorkPath Assessment
         </p>
         {orgName && (
           <button
