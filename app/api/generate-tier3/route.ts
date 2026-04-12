@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     const summaryPrompt = summaryPromptTemplate + "\n\nSCORED RESPONSES:\n" + JSON.stringify(allScored, null, 2);
 
     const summaryMessage = await anthropic.messages.create({
-      model: "claude-opus-4-6",
+      model: "claude-sonnet-4-20250514",
       max_tokens: 4096,
       system: "You are an assessment analysis engine. Produce structured JSON output only.",
       messages: [{ role: "user", content: summaryPrompt }],

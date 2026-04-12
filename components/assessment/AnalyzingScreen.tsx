@@ -17,6 +17,15 @@ const stepMessages: Record<string, string> = {
   error: "Something went wrong",
 };
 
+const stepTimingMessages: Record<string, string> = {
+  scoring_t1: "This should take about 10 seconds.",
+  scoring_t2: "This should take about 30–45 seconds. We're scoring your responses and designing adaptive questions tailored to you.",
+  generating_t3: "This should take about 30–45 seconds. We're scoring your responses and designing adaptive questions tailored to you.",
+  scoring_t3: "This should take about 30–45 seconds. We're finalizing your scores and building your profile.",
+  generating_profile: "This should take about 30–45 seconds. We're finalizing your scores and building your profile.",
+  done: "Wrapping up…",
+};
+
 export function AnalyzingScreen({ step, error, onRetry }: AnalyzingScreenProps) {
   const message = stepMessages[step] || "Processing…";
 
@@ -30,7 +39,7 @@ export function AnalyzingScreen({ step, error, onRetry }: AnalyzingScreenProps) 
               {message}
             </h2>
             <p className="text-[0.88rem] text-muted-foreground leading-relaxed">
-              This takes about 10–15 seconds. We're analyzing your responses against our readiness framework.
+              {stepTimingMessages[step] || "We're analyzing your responses against our readiness framework."}
             </p>
           </div>
         ) : (
