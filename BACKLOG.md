@@ -29,6 +29,10 @@
 - [ ] Build as a server-side API route (e.g. `/api/check-capacity`) — uses `SUPABASE_SERVICE_ROLE_KEY` (not public) to read count, keeps anon key insert-only
 - [ ] Add `SUPABASE_SERVICE_ROLE_KEY` to Vercel env vars (find in Supabase → Settings → API → Service role key)
 
+## Framework
+
+- [ ] Revisit the AI literacy framework "constitution" — foundational document defining the dimensions, levels, and underlying theory of AI readiness that the assessment is built on
+
 ## Harness
 
 - [ ] Update harness model strategy to match production: Sonnet for scoring, Opus for T3 question generation and profile generation
