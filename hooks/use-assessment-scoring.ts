@@ -46,6 +46,7 @@ export function useAssessmentScoring() {
 
   const [t1Scores, setT1Scores] = useState<ScoredResponse[]>([]);
   const [t2Scores, setT2Scores] = useState<ScoredResponse[]>([]);
+  const [performanceSummary, setPerformanceSummary] = useState<any>(null);
   const [t3Questions, setT3Questions] = useState<ScenarioQuestion[]>([]);
   const [t3QuestionsRaw, setT3QuestionsRaw] = useState<RawQuestion[]>([]);
   const [t3Scores, setT3Scores] = useState<ScoredResponse[]>([]);
@@ -78,7 +79,13 @@ export function useAssessmentScoring() {
     }
   };
 
-  const scoreTier2 = async (t2Responses: Record<string, string>, tier2QuestionsRaw: RawQuestion[]) => {
+  const scoreTier2 = async (
+    t2Responses: Record<string, string>,
+    tier2QuestionsRaw: RawQuestion[],
+    t1Responses: Record<string, string>,
+    tier1QuestionsRaw: RawQuestion[],
+    storedT1Scores?: ScoredResponse[]
+  ) => {
     setIsScoring(true);
     setScoringStep("scoring_t2");
     setError(null);
@@ -89,11 +96,33 @@ export function useAssessmentScoring() {
         scenario: q.scenario,
         prompt: q.prompt,
         rubric: q.rubric,
+        dol_content_area: q.dol_content_area,
+        human_function_activated: q.human_function_activated,
       }));
 
-      const data = await callApi("score-tier2", { responses: t2Responses, questions });
+      const usedT1Scores = storedT1Scores || t1Scores;
+      const enrichedT1Scores = usedT1Scores.map((s) => {
+        const q = tier1QuestionsRaw.find((q) => q.id === s.question_id);
+        return {
+          ...s,
+          dol_content_area: q?.dol_content_area || "",
+          human_function_activated: q?.human_function_activated || "",
+        };
+      });
+
+      const data = await callApi("score-tier2", {
+        responses: t2Responses,
+        questions,
+        t1Scores: enrichedT1Scores,
+        t1Questions: tier1QuestionsRaw,
+        t1Responses,
+        summaryPromptTemplate: tier3SummaryTemplate.prompt_template,
+      });
 
       setT2Scores(data.scores);
+      if (data.performanceSummary) {
+        setPerformanceSummary(data.performanceSummary);
+      }
       setScoringStep("idle");
       setIsScoring(false);
       return data;
@@ -107,48 +136,22 @@ export function useAssessmentScoring() {
   };
 
   const generateTier3Questions = async (
-    t1Responses: Record<string, string>,
-    t2Responses: Record<string, string>,
     orgFluencyRaw: string,
-    tier1QuestionsRaw: RawQuestion[],
-    tier2QuestionsRaw: RawQuestion[],
-    storedT1Scores?: ScoredResponse[],
-    storedT2Scores?: ScoredResponse[]
+    storedPerformanceSummary?: any
   ) => {
     setIsScoring(true);
     setScoringStep("generating_t3");
     setError(null);
 
     try {
-      const usedT1Scores = storedT1Scores || t1Scores;
-      const usedT2Scores = storedT2Scores || t2Scores;
-
-      const enrichedT1Scores = usedT1Scores.map((s) => {
-        const q = tier1QuestionsRaw.find((q) => q.id === s.question_id);
-        return {
-          ...s,
-          dol_content_area: q?.dol_content_area || "",
-          human_function_activated: q?.human_function_activated || "",
-        };
-      });
-      const enrichedT2Scores = usedT2Scores.map((s) => {
-        const q = tier2QuestionsRaw.find((q) => q.id === s.question_id);
-        return {
-          ...s,
-          dol_content_area: q?.dol_content_area || "",
-          human_function_activated: q?.human_function_activated || "",
-        };
-      });
+      const summary = storedPerformanceSummary || performanceSummary;
+      if (!summary) {
+        throw new Error("Performance summary unavailable — score Tier 2 first");
+      }
 
       const data = await callApi("generate-tier3", {
-        t1Scores: enrichedT1Scores,
-        t2Scores: enrichedT2Scores,
-        t1Questions: tier1QuestionsRaw,
-        t2Questions: tier2QuestionsRaw,
-        t1Responses,
-        t2Responses,
+        performanceSummary: summary,
         orgFluencyContent: orgFluencyRaw,
-        summaryPromptTemplate: tier3SummaryTemplate.prompt_template,
         questionPromptTemplate: tier3QuestionTemplate.prompt_template,
       });
 

@@ -215,10 +215,12 @@ export function useAssessmentFlow(urlSlug?: string) {
     if (!selectedContext) return;
     setScreen("analyzing_t2t3");
     try {
-      const t2Result = await scoring.scoreTier2(t2Responses, tier2QuestionsRaw);
+      const t2Result = await scoring.scoreTier2(
+        t2Responses, tier2QuestionsRaw, t1Responses, tier1QuestionsRaw
+      );
       await scoring.generateTier3Questions(
-        t1Responses, t2Responses, selectedContext.orgFluencyRaw,
-        tier1QuestionsRaw, tier2QuestionsRaw, undefined, t2Result.scores
+        selectedContext.orgFluencyRaw,
+        t2Result.performanceSummary
       );
       setScreen("transition3");
     } catch {

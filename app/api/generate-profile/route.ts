@@ -22,9 +22,15 @@ export async function POST(request: Request) {
     });
 
     const message = await anthropic.messages.create({
-      model: "claude-opus-4-6",
+      model: "claude-opus-4-7",
       max_tokens: 4096,
-      system: GENERATE_PROFILE_PROMPT,
+      system: [
+        {
+          type: "text",
+          text: GENERATE_PROFILE_PROMPT,
+          cache_control: { type: "ephemeral" },
+        },
+      ],
       messages: [{ role: "user", content: userMessage }],
     });
 
