@@ -48,6 +48,13 @@
 - [ ] Resume via URL param (`?resume=CODE`) or code entry on welcome screen
 - [ ] 7-day session expiry
 
+## Backup & Recovery
+
+- [ ] **Vendor config runbook** — single markdown file (gitignored or outside repo) documenting Vercel project settings + env var names, Supabase project ID + key roles + RLS policy, GoDaddy DNS records for `wkpath.com`, API key locations (Apple Passwords, `~/.zshrc`). The "how do I rebuild this deployment from scratch" doc.
+- [ ] **Pre-launch: Supabase backup posture** — confirm whether the free tier's automatic backups are sufficient for student data, or set up scheduled exports. Zero urgency now (0 rows); real once students start completing.
+- [ ] **Quarterly cold tarball** — `tar czf workpath-cold-YYYYMMDD.tar.gz` of the full repo dropped into Google Drive. Catches anything that somehow didn't make it into Git.
+- [ ] **Re-sync memory folder to Drive when it changes meaningfully** — the `~/.claude/projects/.../memory/` folder isn't in Git; re-upload the zipped copy after notable memory updates.
+
 ## Structured Output (tool_use)
 
 - [ ] Migrate scoring routes to Claude `tool_use` structured output (see design: `.claude/projects/.../memory/project_structured_prompts.md`)
