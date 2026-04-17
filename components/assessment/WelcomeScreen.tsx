@@ -30,6 +30,19 @@ export function WelcomeScreen({ onStart, preselectedContext }: WelcomeScreenProp
   const [showAbout, setShowAbout] = useState(false);
   const [selectedContextId, setSelectedContextId] = useState<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [emailCopied, setEmailCopied] = useState(false);
+
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText("info@wkpath.com").then(
+      () => {
+        setEmailCopied(true);
+        setTimeout(() => setEmailCopied(false), 2000);
+      },
+      () => {
+        // Clipboard unavailable — leave label unchanged
+      }
+    );
+  };
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const isPartnerMode = !!preselectedContext;
@@ -213,18 +226,32 @@ export function WelcomeScreen({ onStart, preselectedContext }: WelcomeScreenProp
       <FadeIn delay={950}>
         <p className="text-[0.78rem] text-muted-foreground mt-5">
           Contact:{" "}
-          <a
-            href="https://rsparkman.net"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-accent hover:text-accent/80 transition-colors"
+          <button
+            type="button"
+            onClick={handleCopyEmail}
+            className="text-accent hover:text-accent/80 transition-colors inline-flex items-center gap-1.5"
             style={{
               textDecoration: "underline",
               textUnderlineOffset: "3px",
             }}
           >
-            Randy Sparkman
-          </a>
+            {emailCopied ? "Copied \u2713" : "info@wkpath.com"}
+            {!emailCopied && (
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                style={{ width: "0.85em", height: "0.85em", opacity: 0.6 }}
+              >
+                <rect x="9" y="9" width="11" height="11" rx="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+            )}
+          </button>
         </p>
       </FadeIn>
     </div>
