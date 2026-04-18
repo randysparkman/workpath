@@ -46,12 +46,13 @@
 
 ## Save & Resume
 
-- [ ] Implement save/resume for in-progress assessments (see design: `.claude/projects/.../memory/project_save_resume.md`)
-- [ ] New Supabase table `assessment_sessions` — stores serialized state + 6-char resume code
-- [ ] Auto-save after each question submission (debounced)
-- [ ] "Save My Progress" button in header after intake — shows resume code + copyable link
-- [ ] Resume via URL param (`?resume=CODE`) or code entry on welcome screen
-- [ ] 7-day session expiry
+- [x] Implement save/resume for in-progress assessments
+- [x] New Supabase table `assessment_sessions` — stores serialized state + 6-char resume code
+- [x] Auto-save after each question submission (debounced)
+- [x] "Save My Progress" button in header after intake — shows resume code + copyable link
+- [x] Resume via URL param (`?resume=CODE`) or code entry on welcome screen
+- [x] 7-day session expiry
+- [ ] **Prune stale `assessment_sessions` rows** — silent partial assessments accumulate as respondents abandon mid-flow. Add a scheduled cleanup (Supabase cron or manual SQL) to delete rows where `updated_at < now() - interval '7 days'`. Not urgent at low volume, but revisit before the student launch scales past a couple hundred rows.
 
 ## Backup & Recovery
 
