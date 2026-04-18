@@ -180,6 +180,8 @@
       background: var(--light);
       padding: 40px 32px;
       text-align: left;
+      display: flex;
+      flex-direction: column;
     }
 
     .opp-card h3 {
@@ -196,13 +198,14 @@
       line-height: 1.75;
     }
 
-    .opp-bridge {
+    .opp-card .opp-hook {
       font-family: 'Playfair Display', serif;
-      font-size: 1.25rem;
       font-style: italic;
+      font-size: 1rem;
       color: var(--navy);
-      max-width: 480px;
-      margin: 0 auto;
+      line-height: 1.5;
+      margin-top: auto;
+      padding-top: 20px;
     }
 
     @media (max-width: 860px) {
@@ -524,18 +527,21 @@
     <div class="opp-grid">
       <div class="opp-card">
         <h3>For the Individual</h3>
-        <p>You're already developing instincts for how to work with AI — when to trust it, when to push back, and how to direct it toward something useful. But without a clear picture of where you stand, you can't leverage your strengths or close your gaps with much precision. You're advancing, but you may not know how far you've come.</p>
+        <p>You're already developing instincts for how to work with AI — when to trust it, when to push back, how to direct it. But without a clear picture of where you stand, you can't leverage your strengths with precision. You're advancing. You may not know how far.</p>
+        <p class="opp-hook">Use this assessment to direct your own development with precision.</p>
       </div>
       <div class="opp-card">
         <h3>For the Organization</h3>
-        <p>Your people may be further along than you think — or they may need development you haven't targeted yet. Either way, you're making AI investments without a clear view of the readiness you already have. You can't capitalize on what you can't see, and you can't develop what you can't measure.</p>
+        <p>Your people may be further along than you think — or they may need development you haven't targeted. Either way, you're making AI investments without a clear view of the readiness you already have. You can't capitalize on what you can't see.</p>
+        <p class="opp-hook">Use this assessment to work smarter.</p>
       </div>
       <div class="opp-card">
         <h3>For the Workforce Developer</h3>
-        <p>Whether you're a university, a training program, or a workforce agency, your job is to build AI readiness in people. But right now you may have no credible way to show where someone started, how far they've come, or what your program actually produced. The work is real. The evidence often isn't.</p>
+        <p>Your job is to build AI readiness in people. But you may have no credible way to show where someone started, how far they've come, or what your program actually produced. The work is real. The evidence often isn't.</p>
+        <p class="opp-hook">Use this assessment to compound impact.</p>
+      </div>
       </div>
     </div>
-    <p class="opp-bridge">The WorkPath Assessment makes it visible.</p>
   </section>
 
   <!-- WHAT IT IS -->

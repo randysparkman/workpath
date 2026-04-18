@@ -79,7 +79,7 @@ git push   # Vercel auto-deploys in ~30 seconds
 | score-tier2 | `claude-sonnet-4-6` | Rubric scoring + performance summary in one call (merged from old generate-tier3 step 1) |
 | score-tier3 | `claude-sonnet-4-6` | Structured rubric scoring — fast, cheap |
 | generate-tier3 | `claude-opus-4-7` | Adaptive question design — creative. Static template cached (ephemeral) |
-| generate-profile | `claude-opus-4-7` | Narrative synthesis — the deliverable. ~438-line system prompt cached (ephemeral) |
+| generate-profile | `claude-sonnet-4-6` | Narrative synthesis — switched from Opus to simplify language and reduce latency |
 
 **Cost:** ~$0.20–0.25 per full assessment (before cache discounts).
 
