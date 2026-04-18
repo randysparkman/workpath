@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { intakeQuestions, type IntakeAnswers } from "@/data/intake-questions";
 import { getSupabase } from "@/lib/supabase";
 import { useAssessmentScoring } from "@/hooks/use-assessment-scoring";
@@ -11,6 +11,7 @@ import {
   type WorkContext,
 } from "@/data/work-contexts";
 import type { ScenarioQuestion } from "@/data/assessment-types";
+import { generateResumeCode, saveSession, type SessionState } from "@/lib/session";
 
 export type Screen =
   | "welcome"
@@ -42,6 +43,8 @@ export function useAssessmentFlow(urlSlug?: string) {
   const [userName, setUserName] = useState("");
   const [selectedContext, setSelectedContext] = useState<WorkContext | null>(null);
   const [assessmentStartedAt, setAssessmentStartedAt] = useState<string | null>(null);
+  const [resumeCode, setResumeCode] = useState<string | null>(null);
+  const resumeCodeRef = useRef<string | null>(null);
 
   const handleSetSelectedContext = useCallback((ctx: WorkContext | null) => {
     setSelectedContext(ctx);
@@ -64,6 +67,55 @@ export function useAssessmentFlow(urlSlug?: string) {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [screen]);
+
+  // Auto-save in-progress session (debounced 500ms). Skip pre-context screens
+  // and terminal states where there's nothing actionable to resume.
+  useEffect(() => {
+    if (!selectedContext) return;
+    if (screen === "welcome" || screen === "name_input" || screen === "profile") return;
+
+    let code = resumeCodeRef.current;
+    if (!code) {
+      code = generateResumeCode();
+      resumeCodeRef.current = code;
+      setResumeCode(code);
+    }
+
+    const timer = setTimeout(() => {
+      const state: SessionState = {
+        screen,
+        userName,
+        selectedContextId: selectedContext.id,
+        assessmentStartedAt,
+        intakeIndex,
+        intakeAnswers,
+        t1Index,
+        t1Responses,
+        t1Scores: scoring.t1Scores,
+        t2Index,
+        t2Responses,
+        t2Scores: scoring.t2Scores,
+        t3Index,
+        t3Responses,
+        t3Scores: scoring.t3Scores,
+        t3Questions: scoring.t3Questions,
+        t3QuestionsRaw: scoring.t3QuestionsRaw,
+      };
+      saveSession(code!, state, urlSlug ?? selectedContext.id).catch((e) => {
+        console.warn("Session save failed:", e);
+      });
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [
+    screen, userName, selectedContext, assessmentStartedAt,
+    intakeIndex, intakeAnswers,
+    t1Index, t1Responses, scoring.t1Scores,
+    t2Index, t2Responses, scoring.t2Scores,
+    t3Index, t3Responses, scoring.t3Scores,
+    scoring.t3Questions, scoring.t3QuestionsRaw,
+    urlSlug,
+  ]);
 
   useEffect(() => {
     if (scoring.scoringStep === "done" && scoring.profile) {
@@ -198,6 +250,8 @@ export function useAssessmentFlow(urlSlug?: string) {
     setT3Index(0);
     setSelectedContext(null);
     setAssessmentStartedAt(null);
+    setResumeCode(null);
+    resumeCodeRef.current = null;
     setScreen("welcome");
   }, []);
 
@@ -289,6 +343,9 @@ export function useAssessmentFlow(urlSlug?: string) {
     setT3Index,
     t3Responses,
     setT3Responses,
+
+    // Session
+    resumeCode,
 
     // Scoring (forwarded)
     isScoring: scoring.isScoring,

@@ -285,6 +285,7 @@ export function useAssessmentScoring() {
     t2Scores,
     t3Scores,
     t3Questions,
+    t3QuestionsRaw,
     scoreTier1,
     scoreTier2,
     generateTier3Questions,
