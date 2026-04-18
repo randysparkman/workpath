@@ -18,7 +18,7 @@ workpath/
       score-tier1/route.ts        # Sonnet — rubric scoring
       score-tier2/route.ts        # Sonnet — rubric scoring + performance summary (merged)
       score-tier3/route.ts        # Sonnet — rubric scoring
-      generate-tier3/route.ts     # Opus — adaptive question generation (cached prompt)
+      generate-tier3/route.ts     # Sonnet — adaptive question generation (cached prompt)
       generate-profile/route.ts   # Opus — narrative profile (cached prompt)
   components/
     AssessmentPage.tsx            # Main page component
@@ -74,7 +74,7 @@ git push   # Vercel auto-deploys in ~30 seconds
 | score-tier1 | `claude-sonnet-4-6` | Structured rubric scoring — fast, cheap |
 | score-tier2 | `claude-sonnet-4-6` | Rubric scoring + performance summary in one call (merged from old generate-tier3 step 1) |
 | score-tier3 | `claude-sonnet-4-6` | Structured rubric scoring — fast, cheap |
-| generate-tier3 | `claude-opus-4-7` | Adaptive question design — creative. Static template cached (ephemeral) |
+| generate-tier3 | `claude-sonnet-4-6` | Adaptive question design. Static template cached (ephemeral). Switched from Opus — single call exceeded Vercel Hobby 60s limit |
 | generate-profile | `claude-sonnet-4-6` | Narrative synthesis — switched from Opus to simplify language and reduce latency |
 
 **Cost:** ~$0.20–0.25 per full assessment (before cache discounts).

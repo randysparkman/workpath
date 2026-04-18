@@ -25,7 +25,16 @@ async function callApi(endpoint: string, body: any): Promise<any> {
     body: JSON.stringify(body),
   });
 
-  const data = await response.json();
+  let data: any;
+  const text = await response.text();
+  try {
+    data = JSON.parse(text);
+  } catch {
+    // Vercel killed the function (timeout/OOM) and returned a non-JSON error page
+    throw new Error(
+      `Request to ${endpoint} failed (${response.status}) — the server returned an unexpected response. Please try again.`
+    );
+  }
 
   if (!response.ok) {
     throw new Error(data?.error || `API call to ${endpoint} failed (${response.status})`);

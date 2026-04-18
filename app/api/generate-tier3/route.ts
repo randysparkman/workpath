@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
-import { anthropic } from "@/lib/anthropic";
+import Anthropic from "@anthropic-ai/sdk";
 import { parseAIJson } from "@/lib/parse-ai-json";
 import { logApiTiming } from "@/lib/api-timing";
 
 export const maxDuration = 60;
+
+// Fewer retries so backoff doesn't push past Vercel's 60s limit.
+const anthropic = new Anthropic({ maxRetries: 1 });
 
 export async function POST(request: Request) {
   const startedAt = Date.now();
@@ -31,26 +34,37 @@ export async function POST(request: Request) {
       "\n\n" +
       orgFluencyBlock;
 
+    const abort = new AbortController();
+    const timeoutId = setTimeout(() => abort.abort(), 50_000);
+
     const tModel = Date.now();
-    const questionMessage = await anthropic.messages.create({
-      model: "claude-opus-4-7",
-      max_tokens: 6000,
-      system:
-        "You are an adaptive assessment question generator. Produce structured JSON output only.",
-      messages: [
+    let questionMessage: Awaited<ReturnType<typeof anthropic.messages.create>>;
+    try {
+      questionMessage = await anthropic.messages.create(
         {
-          role: "user",
-          content: [
+          model: "claude-sonnet-4-6",
+          max_tokens: 6000,
+          system:
+            "You are an adaptive assessment question generator. Produce structured JSON output only.",
+          messages: [
             {
-              type: "text",
-              text: questionPromptTemplate,
-              cache_control: { type: "ephemeral" },
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: questionPromptTemplate,
+                  cache_control: { type: "ephemeral" },
+                },
+                { type: "text", text: dynamicSuffix },
+              ],
             },
-            { type: "text", text: dynamicSuffix },
           ],
         },
-      ],
-    });
+        { signal: abort.signal },
+      );
+    } finally {
+      clearTimeout(timeoutId);
+    }
     const modelElapsedMs = Date.now() - tModel;
 
     const questionText = questionMessage.content.find((c) => c.type === "text");
@@ -68,6 +82,12 @@ export async function POST(request: Request) {
     });
   } catch (e: any) {
     console.error("generate-tier3 error:", e);
+    if (e?.name === "AbortError" || e?.code === "ERR_CANCELED") {
+      return NextResponse.json(
+        { error: "Question generation timed out. Please try again." },
+        { status: 504 },
+      );
+    }
     if (e?.status === 429) {
       return NextResponse.json(
         { error: "Rate limit exceeded. Please try again in a moment." },
