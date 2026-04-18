@@ -82,7 +82,12 @@ export async function POST(request: Request) {
     });
   } catch (e: any) {
     console.error("generate-tier3 error:", e);
-    if (e?.name === "AbortError" || e?.code === "ERR_CANCELED") {
+    const isAbort =
+      e?.name === "AbortError" ||
+      e?.code === "ERR_CANCELED" ||
+      e?.message?.includes("aborted") ||
+      e?.message?.includes("timed out");
+    if (isAbort) {
       return NextResponse.json(
         { error: "Question generation timed out. Please try again." },
         { status: 504 },
