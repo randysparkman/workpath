@@ -1,7 +1,10 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { intakeQuestions } from "@/data/intake-questions";
 import { getContextBySlug } from "@/data/work-contexts";
+import { loadSession } from "@/lib/session";
 import { WelcomeScreen } from "@/components/assessment/WelcomeScreen";
 import { NameInputScreen } from "@/components/assessment/NameInputScreen";
 import { IntakeScreen } from "@/components/assessment/IntakeScreen";
@@ -26,8 +29,40 @@ export default function AssessmentPage({ slug }: AssessmentPageProps) {
 
   const flow = useAssessmentFlow(slug);
 
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const resumeAttempted = useRef(false);
+  const [resumeStatus, setResumeStatus] = useState<"idle" | "loading" | "notfound">("idle");
+
+  useEffect(() => {
+    if (resumeAttempted.current) return;
+    const code = searchParams?.get("resume");
+    if (!code) return;
+    resumeAttempted.current = true;
+    setResumeStatus("loading");
+
+    loadSession(code.toUpperCase()).then((result) => {
+      if (result && flow.hydrateFromSession(code.toUpperCase(), result.state)) {
+        setResumeStatus("idle");
+      } else {
+        setResumeStatus("notfound");
+      }
+      // Clean the URL so a reload doesn't re-trigger
+      router.replace(pathname ?? "/");
+    });
+  }, [searchParams, flow, router, pathname]);
+
   if (isInvalidSlug) {
     return <InvalidProfileScreen slug={slug} />;
+  }
+
+  if (resumeStatus === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6 font-sans text-sm text-muted-foreground">
+        Resuming your assessment…
+      </div>
+    );
   }
 
   return (
@@ -37,10 +72,17 @@ export default function AssessmentPage({ slug }: AssessmentPageProps) {
       )}
 
       {flow.screen === "welcome" && (
-        <WelcomeScreen
-          onStart={(ctx) => { flow.setSelectedContext(ctx); flow.setScreen("name_input"); }}
-          preselectedContext={preselectedContext}
-        />
+        <>
+          {resumeStatus === "notfound" && (
+            <div className="max-w-md mx-auto mt-4 mb-6 rounded border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              That resume code wasn't found or has expired. Starting a new assessment.
+            </div>
+          )}
+          <WelcomeScreen
+            onStart={(ctx) => { flow.setSelectedContext(ctx); flow.setScreen("name_input"); }}
+            preselectedContext={preselectedContext}
+          />
+        </>
       )}
 
       {flow.screen === "name_input" && (

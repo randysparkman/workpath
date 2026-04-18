@@ -85,6 +85,10 @@ export function getContextBySlug(slug: string): WorkContext | undefined {
   return workContexts.find((c) => c.slug === slug && c.enabled);
 }
 
+export function getContextById(id: string): WorkContext | undefined {
+  return workContexts.find((c) => c.id === id && c.enabled);
+}
+
 export function getTier1Questions(context: WorkContext): ScenarioQuestion[] {
   return context.tier1Data.questions.map((q: RawQuestion) => ({
     id: q.id,

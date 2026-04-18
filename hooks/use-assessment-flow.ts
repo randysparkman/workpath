@@ -12,6 +12,7 @@ import {
 } from "@/data/work-contexts";
 import type { ScenarioQuestion } from "@/data/assessment-types";
 import { generateResumeCode, saveSession, type SessionState } from "@/lib/session";
+import { getContextById } from "@/data/work-contexts";
 
 export type Screen =
   | "welcome"
@@ -238,6 +239,35 @@ export function useAssessmentFlow(urlSlug?: string) {
     }
   }, [screen, intakeIndex, t1Index, t2Index, t3Index, tier1Questions.length, tier2Questions.length, scoring.t3Questions.length]);
 
+  const hydrateFromSession = useCallback((code: string, state: SessionState) => {
+    const ctx = getContextById(state.selectedContextId ?? "");
+    if (!ctx) return false;
+
+    resumeCodeRef.current = code;
+    setResumeCode(code);
+
+    setSelectedContext(ctx);
+    setUserName(state.userName);
+    setAssessmentStartedAt(state.assessmentStartedAt);
+    setIntakeIndex(state.intakeIndex);
+    setIntakeAnswers(state.intakeAnswers);
+    setT1Index(state.t1Index);
+    setT1Responses(state.t1Responses);
+    setT2Index(state.t2Index);
+    setT2Responses(state.t2Responses);
+    setT3Index(state.t3Index);
+    setT3Responses(state.t3Responses);
+    scoring.hydrate({
+      t1Scores: state.t1Scores,
+      t2Scores: state.t2Scores,
+      t3Scores: state.t3Scores,
+      t3Questions: state.t3Questions,
+      t3QuestionsRaw: state.t3QuestionsRaw,
+    });
+    setScreen(state.screen);
+    return true;
+  }, [scoring]);
+
   const handleReset = useCallback(() => {
     setUserName("");
     setIntakeAnswers({});
@@ -346,6 +376,7 @@ export function useAssessmentFlow(urlSlug?: string) {
 
     // Session
     resumeCode,
+    hydrateFromSession,
 
     // Scoring (forwarded)
     isScoring: scoring.isScoring,

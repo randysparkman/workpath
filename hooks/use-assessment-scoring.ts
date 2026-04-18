@@ -286,6 +286,19 @@ export function useAssessmentScoring() {
     t3Scores,
     t3Questions,
     t3QuestionsRaw,
+    hydrate: (partial: {
+      t1Scores?: ScoredResponse[];
+      t2Scores?: ScoredResponse[];
+      t3Scores?: ScoredResponse[];
+      t3Questions?: ScenarioQuestion[];
+      t3QuestionsRaw?: RawQuestion[];
+    }) => {
+      if (partial.t1Scores) setT1Scores(partial.t1Scores);
+      if (partial.t2Scores) setT2Scores(partial.t2Scores);
+      if (partial.t3Scores) setT3Scores(partial.t3Scores);
+      if (partial.t3Questions) setT3Questions(partial.t3Questions);
+      if (partial.t3QuestionsRaw) setT3QuestionsRaw(partial.t3QuestionsRaw);
+    },
     scoreTier1,
     scoreTier2,
     generateTier3Questions,
