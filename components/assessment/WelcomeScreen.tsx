@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { FadeIn } from "./FadeIn";
 import { IconCircle, LayersIcon } from "./Icons";
 import { NavButton } from "./NavButton";
@@ -31,6 +32,17 @@ export function WelcomeScreen({ onStart, preselectedContext }: WelcomeScreenProp
   const [selectedContextId, setSelectedContextId] = useState<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [emailCopied, setEmailCopied] = useState(false);
+  const [showResume, setShowResume] = useState(false);
+  const [resumeCodeInput, setResumeCodeInput] = useState("");
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const handleResumeSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const code = resumeCodeInput.trim().toUpperCase();
+    if (code.length !== 6) return;
+    router.push(`${pathname ?? "/"}?resume=${code}`);
+  };
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText("info@wkpath.com").then(
@@ -226,6 +238,43 @@ export function WelcomeScreen({ onStart, preselectedContext }: WelcomeScreenProp
           Need to pause? Your progress saves automatically. You&rsquo;ll get a resume code from the
           &ldquo;Save my progress&rdquo; link in the header any time during the assessment.
         </p>
+        <div className="mt-3 max-w-[420px] mx-auto">
+          {!showResume ? (
+            <button
+              onClick={() => setShowResume(true)}
+              className="text-[0.82rem] text-accent bg-transparent border-none cursor-pointer"
+              style={{ textDecoration: "underline", textUnderlineOffset: "3px" }}
+            >
+              Have a resume code?
+            </button>
+          ) : (
+            <form onSubmit={handleResumeSubmit} className="flex items-center gap-2 justify-center">
+              <input
+                type="text"
+                value={resumeCodeInput}
+                onChange={(e) => setResumeCodeInput(e.target.value.toUpperCase().slice(0, 6))}
+                placeholder="6-char code"
+                autoFocus
+                maxLength={6}
+                className="font-mono text-[0.95rem] tracking-[0.2em] px-3 py-2 border border-border-light rounded bg-white text-center w-[160px] focus:outline-none focus:border-accent"
+              />
+              <button
+                type="submit"
+                disabled={resumeCodeInput.trim().length !== 6}
+                className="text-[0.82rem] font-medium text-accent-foreground bg-accent rounded px-3 py-2 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Resume
+              </button>
+              <button
+                type="button"
+                onClick={() => { setShowResume(false); setResumeCodeInput(""); }}
+                className="text-[0.82rem] text-muted-foreground bg-transparent border-none"
+              >
+                Cancel
+              </button>
+            </form>
+          )}
+        </div>
       </FadeIn>
       <FadeIn delay={950}>
         <p className="text-[0.78rem] text-muted-foreground mt-5">
