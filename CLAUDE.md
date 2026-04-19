@@ -19,7 +19,7 @@ workpath/
       score-tier2/route.ts        # Sonnet — rubric scoring + performance summary (merged)
       score-tier3/route.ts        # Sonnet — rubric scoring
       generate-tier3/route.ts     # Sonnet — adaptive question generation (cached prompt)
-      generate-profile/route.ts   # Opus — narrative profile (cached prompt)
+      generate-profile/route.ts   # Sonnet — narrative profile (cached prompt)
   components/
     AssessmentPage.tsx            # Main page component
     assessment/                   # 17 screen + shared components
@@ -35,6 +35,10 @@ workpath/
       generate-profile-prompt.ts  # ~440-line profile generation system prompt
   public/
     brochure.html                 # Static brochure (served via rewrite at /brochure)
+  scripts/
+    regenerate-profile.mjs        # Authoring tool: regenerates T1/T2 questions for a profile
+    tier1-question-generation-prompt.md  # v0.2.1 — source of truth for T1 question design
+    tier2-question-generation-prompt.md  # v0.2.1 — source of truth for T2 question design
   BACKLOG.md                      # Project backlog and pre-launch items
 ```
 
@@ -42,7 +46,7 @@ workpath/
 
 ## GitHub & Deployment
 - **GitHub repo:** `https://github.com/randysparkman/workpath`
-- **Vercel project:** `workpath` (Framework Preset: Next.js, auto-deploys on push to `main`)
+- **Vercel project:** `workpath` (Framework Preset: Next.js, auto-deploys on push to `main`, **Pro plan** — 300s function ceiling)
 - **Live URLs:**
   - `https://wkpath.com/` — assessment app
   - `https://wkpath.com/brochure` — static brochure
@@ -74,7 +78,7 @@ git push   # Vercel auto-deploys in ~30 seconds
 | score-tier1 | `claude-sonnet-4-6` | Structured rubric scoring — fast, cheap |
 | score-tier2 | `claude-sonnet-4-6` | Rubric scoring + performance summary in one call (merged from old generate-tier3 step 1) |
 | score-tier3 | `claude-sonnet-4-6` | Structured rubric scoring — fast, cheap |
-| generate-tier3 | `claude-sonnet-4-6` | Adaptive question design. Static template cached (ephemeral). Switched from Opus — single call exceeded Vercel Hobby 60s limit |
+| generate-tier3 | `claude-sonnet-4-6` | Adaptive question design. Static template cached (ephemeral). Switched from Opus when generate exceeded Hobby 60s; now on Vercel Pro with 300s ceiling |
 | generate-profile | `claude-sonnet-4-6` | Narrative synthesis — switched from Opus to simplify language and reduce latency |
 
 **Cost:** ~$0.20–0.25 per full assessment (before cache discounts).
