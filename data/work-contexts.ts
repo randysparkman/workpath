@@ -4,12 +4,15 @@ import jobRoleGeneralRaw from "./job-role-profile-general.md";
 import jobRoleMedicalRaw from "./job-role-profile-medical-billing.md";
 // @ts-ignore
 import jobRoleCie499Raw from "./job-role-profile-cie499.md";
+// @ts-ignore
+import jobRoleFrontDoorRaw from "./job-role-profile-front-door.md";
 import { parseJobRoleProfile } from "./parse-job-role-profile";
 import type { ScenarioQuestion, RawQuestion } from "./assessment-types";
 
 const generalProfile = parseJobRoleProfile(jobRoleGeneralRaw);
 const medicalProfile = parseJobRoleProfile(jobRoleMedicalRaw);
 const cie499Profile = parseJobRoleProfile(jobRoleCie499Raw);
+const frontDoorProfile = parseJobRoleProfile(jobRoleFrontDoorRaw);
 
 export interface WorkContext {
   id: string;
@@ -28,13 +31,26 @@ export interface WorkContext {
 
 export const workContexts: WorkContext[] = [
   {
+    id: "front-door",
+    slug: "front-door",
+    label: frontDoorProfile.roleLabel,
+    description: "",
+    roleDescription: frontDoorProfile.roleDescription,
+    enabled: true,
+    public: true,
+    orgName: frontDoorProfile.roleLabel,
+    orgFluencyRaw: frontDoorProfile.roleContext,
+    tier1Data: frontDoorProfile.tier1Data,
+    tier2Data: frontDoorProfile.tier2Data,
+  },
+  {
     id: "general",
     slug: "general",
     label: generalProfile.roleLabel,
     description: "",
     roleDescription: generalProfile.roleDescription,
     enabled: true,
-    public: true,
+    public: false,
     orgName: generalProfile.roleLabel,
     orgFluencyRaw: generalProfile.roleContext,
     tier1Data: generalProfile.tier1Data,
@@ -47,7 +63,7 @@ export const workContexts: WorkContext[] = [
     description: "",
     roleDescription: medicalProfile.roleDescription,
     enabled: true,
-    public: true,
+    public: false,
     orgName: medicalProfile.roleLabel,
     orgFluencyRaw: medicalProfile.roleContext,
     tier1Data: medicalProfile.tier1Data,
