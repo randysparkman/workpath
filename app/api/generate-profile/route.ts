@@ -4,7 +4,7 @@ import { parseAIJson } from "@/lib/parse-ai-json";
 import { GENERATE_PROFILE_PROMPT } from "@/lib/prompts/generate-profile-prompt";
 import { logApiTiming } from "@/lib/api-timing";
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 export async function POST(request: Request) {
   const startedAt = Date.now();

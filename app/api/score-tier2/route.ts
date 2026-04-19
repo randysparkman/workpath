@@ -3,9 +3,9 @@ import Anthropic from "@anthropic-ai/sdk";
 import { parseAIJson } from "@/lib/parse-ai-json";
 import { logApiTiming } from "@/lib/api-timing";
 
-export const maxDuration = 60;
+export const maxDuration = 120;
 
-// Fewer retries so backoff doesn't compound toward the 60s Vercel limit.
+// Fewer retries so backoff doesn't compound the timeout.
 const anthropic = new Anthropic({ maxRetries: 1 });
 
 const SYSTEM_PROMPT = `You are an AI-readiness assessment engine. You will perform TWO tasks in a single response.
@@ -57,7 +57,7 @@ Judgment:
 
 function makeAbortController() {
   const abort = new AbortController();
-  const timeoutId = setTimeout(() => abort.abort(), 55_000);
+  const timeoutId = setTimeout(() => abort.abort(), 110_000);
   return { signal: abort.signal, clear: () => clearTimeout(timeoutId) };
 }
 

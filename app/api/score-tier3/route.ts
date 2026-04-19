@@ -3,7 +3,7 @@ import { anthropic } from "@/lib/anthropic";
 import { parseAIJson } from "@/lib/parse-ai-json";
 import { logApiTiming } from "@/lib/api-timing";
 
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 const SYSTEM_PROMPT = `You are scoring responses to the final tier of an AI-readiness assessment. These are adaptive questions designed to fill evidence gaps and confirm placement. For each question, you must:
 (1) Assign an orientation level (emerging, developing, demonstrating) based on which rubric description best matches the response.

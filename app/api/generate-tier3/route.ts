@@ -3,9 +3,9 @@ import Anthropic from "@anthropic-ai/sdk";
 import { parseAIJson } from "@/lib/parse-ai-json";
 import { logApiTiming } from "@/lib/api-timing";
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
-// Fewer retries so backoff doesn't push past Vercel's 60s limit.
+// Fewer retries so backoff doesn't compound the timeout.
 const anthropic = new Anthropic({ maxRetries: 1 });
 
 export async function POST(request: Request) {
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       orgFluencyBlock;
 
     const abort = new AbortController();
-    const timeoutId = setTimeout(() => abort.abort(), 50_000);
+    const timeoutId = setTimeout(() => abort.abort(), 280_000);
 
     const tModel = Date.now();
     let questionMessage: Awaited<ReturnType<typeof anthropic.messages.create>>;

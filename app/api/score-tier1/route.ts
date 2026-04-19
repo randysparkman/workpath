@@ -3,7 +3,7 @@ import { anthropic } from "@/lib/anthropic";
 import { parseAIJson } from "@/lib/parse-ai-json";
 import { logApiTiming } from "@/lib/api-timing";
 
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 const SYSTEM_PROMPT = `You are scoring responses to an AI-readiness assessment. You will receive 5 scenarios with user responses and rubrics. For each question, you must:
 (1) Assign an orientation level (emerging, developing, demonstrating) based on which rubric description best matches the response.
