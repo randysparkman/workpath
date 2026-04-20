@@ -15,13 +15,7 @@
 Context (2026-04-19): baseline per-assessment latency on Sonnet end-to-end is ~4 minutes, dominated by `generate-tier3` (~100s) and `score-tier2` (~60s). Instrumentation (`[timing]` lines) confirms essentially 100% of wall clock is Anthropic model time — Vercel overhead is negligible. Plan below is ordered by expected impact and is designed to be tackled one step at a time, with Claude Chat consulted for schema-level changes before implementation.
 
 ### Step 1 — Diagnose why generate-tier3 prompt cache is not engaging
-- Current state: template moved into `system` array with `cache_control: ephemeral`, matching the working `generate-profile` pattern. Despite this, `cache_write=0 cache_read=0` on back-to-back runs. `generate-profile` caches successfully (`cache_write=10137`).
-- Hypothesis: token count of the combined system block (short prefix + ~1.6k template) may be sitting right at Sonnet's 1024-token minimum; or the concatenation is producing content below the threshold after tokenization.
-- Actions:
-  - Log the exact system-block size being sent (char + rough token count) and verify it's comfortably above 1024.
-  - Try a two-element system array (`[prefix, template]` with `cache_control` on the template element) instead of a single concatenated string.
-  - If still not caching, read Anthropic's current cache docs for any constraints specific to content-block structure we may be missing.
-- Expected win: ~0.5s per call (not a latency lever; this is a cost + correctness item).
+- **Status (2026-04-20): superseded.** The monolithic `generate-tier3` route was retired (commit `925b4bb`) and replaced with `generate-tier3-stems` + parallel `generate-tier3-rubric` calls (commit `a96120f`). The original diagnosis target no longer exists. Re-audit caching on the two replacement routes if cost becomes a concern; otherwise leave closed.
 
 ### Step 2 — Compress score-tier2 output schema
 - Current state: score-tier2 produces ~2.77k output tokens. At ~40–50 tok/s this is the structural 60s floor for that route.
@@ -34,26 +28,15 @@ Context (2026-04-19): baseline per-assessment latency on Sonnet end-to-end is ~4
 - Expected win: 500–1000 output tokens saved = 10–20s off score-tier2.
 
 ### Step 3 — Compress generate-tier3 output schema
-- Current state: ~5.1k output tokens (5 full scenarios each with 9 rubric bullets + `tier3_meta`).
-- Actions:
-  - Audit `tier3_meta` usage across the codebase — if nothing consumes it, drop it from the schema. Pure design-time artifact.
-  - Look at the 9-bullet-per-question rubric format. Each question currently emits emerging/developing/demonstrating descriptions for orientation, integration, and judgment. Options: one-sentence descriptions instead of multi-clause, or shared rubric language across scoped question types.
-  - Consult Claude Chat on whether trimmed rubrics still give score-tier3 enough signal to grade accurately. This is the highest-risk change — don't cut too deep.
-- Expected win: 1–2k output tokens saved = 20–40s off generate-tier3. Largest single latency lever in the whole assessment.
+- **Status (2026-04-20): largely landed.** Route was split into stems + parallel rubrics (commit `a96120f`); dead fields trimmed (commit `3e00cd7`). Five rubrics now generate in parallel rather than serially inside one giant call.
+- **Remaining sub-item:** Tighten the rubric *body* itself (9-bullet emerging/developing/demonstrating per construct → terser language, or shared scaffolding across scoped question types). Still a real latency win per rubric call, gated on Claude Chat consult so accuracy doesn't degrade.
 
 ### Step 4 — Cache score-tier2 system prompt + rubrics
-- Current state: `SYSTEM_PROMPT` is a plain string literal (not cacheable). Rubric text for all 5 T2 questions is rebuilt into a string on every call — identical per deployment but never cached.
-- Actions:
-  - Restructure `SYSTEM_PROMPT` into a system array element with `cache_control`.
-  - Move the rubric block into a cached system element if it's static per profile (rubrics come from the profile `.md`, which doesn't change within a deploy).
-  - Similarly audit score-tier1 and score-tier3.
-- Expected win: ~3–5s per scoring call. Also reduces cost materially across 100 students.
+- **Status (2026-04-20): done for score-tier2** (commit `f9dfac5` — static system prompt restructured into cached array element). Plus a follow-on: the route was split in two for Ticket 1 (commit `29fe055`), so the `SCORE_ONLY_SYSTEM` and the summary prompt both benefit.
+- **Remaining sub-item:** audit score-tier1 and score-tier3 for the same pattern — both still likely use plain-string system prompts.
 
 ### Step 5 — Prompt-side: prevent preamble in generate-profile
-- Current state: Sonnet occasionally prefixes prose ("I'll work through this...") before the JSON, causing parse failures. Parser was hardened to slice `{...}`, but prevention is better than cure.
-- Actions:
-  - Review `lib/prompts/generate-profile-prompt.ts` for any phrasing that invites Sonnet to narrate its reasoning before outputting JSON.
-  - Add an explicit "output JSON only — no preamble, no explanation, no markdown fences" line near the end of the prompt.
+- **Status (2026-04-20): unverified.** Recent edits to `lib/prompts/generate-profile-prompt.ts` for Tickets 2+3 (commit `6442717`) didn't add the explicit "output JSON only — no preamble" line. Worth a focused 10-min pass: read the prompt's tail, add the line if missing, observe whether parse retries drop.
 - Expected win: fewer parse retries (retries are the most expensive failure mode — they effectively double the route's wall clock).
 
 ### Step 6 — Migrate scoring routes to `tool_use` structured output
@@ -64,16 +47,30 @@ Context (2026-04-19): baseline per-assessment latency on Sonnet end-to-end is ~4
 - Tracked separately under "Wait Screen UX → Phase 2". Does not reduce actual time but converts a blank 100s wait into visible progress.
 - Defer until Steps 1–6 have done what they can structurally.
 
-### Ordering note
-Steps 1, 4, and 5 are low-risk and independent — safe to do in any order. Steps 2 and 3 are the big latency wins but require schema decisions that should be reviewed with Claude Chat before implementing. Step 6 is a dependent refactor. Step 7 is the last-mile UX item.
+### Ordering note (refreshed 2026-04-20)
+Steps 1, 3 (structural), and 4 (score-tier2) are landed. Remaining latency levers in priority order: **Step 2** (score-tier2 schema compression — biggest unclaimed win, ~10–20s), **Step 3 carve-out** (rubric-body tightening per call), **Step 4 carve-out** (cache score-tier1 + score-tier3 system prompts), **Step 5** (verify anti-preamble line in generate-profile prompt), **Step 6** (tool_use migration — dependent refactor, do after Step 2 schema lands), **Step 7** (streaming, last-mile UX, deferred).
 
 ## Content & Profile Quality
 
 - [ ] Tighten profile summary — currently too verbose, needs to be more concise
-- [ ] Reduce inferred thinking — profile attributes reasoning to the respondent that wasn't explicitly stated; stay closer to what they actually said
+- [ ] Reduce inferred thinking — profile attributes reasoning to the respondent that wasn't explicitly stated; stay closer to what they actually said. _Partially addressed by Ticket 3 (commit `6442717` — doing_well first item must open with respondent-specific observation, not template). Broader prompt pass still warranted._
 - [ ] Build 3–4 new job-role profiles (TBD which roles)
 - [ ] Update `lib/generatePdf.ts` — replace "AI Readiness Profile" references with WorkPath branding
 - [ ] Update `lib/prompts/generate-profile-prompt.ts` — align profile generation language with WorkPath brand voice (see `public/brochure.html` as reference)
+
+## Calibration & Scoring
+
+Recent shipped work (Jasmine post-rubric-retune audit, 2026-04-20):
+
+- [x] **Ticket 1 — Deterministic level counts** (commit `29fe055`). Split `score-tier2` into two calls; deterministic `tallyConstruct` injects authoritative counts into the performance-summary prompt. Fixes "4 of 10 demonstrating" miscount when actual was 7/3. Verified on Jasmine re-run — narrative now matches `[counts]` log exactly.
+- [x] **Ticket 2 — Within-construct mixed scoring** (commit `6442717`). Three additive edits to `generate-profile-prompt.ts`: new §3.6.1, qualifier on §4.3 editorial-moment permission, new §4.4 final-check item #5. Bans minimizing phrases like "matters less in practice than in theory." Verified — Orientation detail now surfaces both Demonstrating and Developing patterns as current.
+- [x] **Ticket 3 — doing_well opener specificity** (commit `6442717`). First item must open with respondent-specific observation, not a template sentence.
+
+### Calibration watchlist (open)
+
+- [ ] **Demonstrating-inflation across personas (Maya / Rita / Jordan).** Three earlier agentic runs all scored Demonstrating despite personas designed with Developing-level gaps (HIPAA/PHI blind spot for Rita; principle-vs-application gap for Jordan). Today's tickets address the Jasmine pattern (within-construct flattening + miscount), but the fluency-over-substance concern is independent and remains live. Worth raising with Claude Chat during a structured rubric review session.
+- [ ] **Re-run Maya / Rita / Jordan against the v0.3.0 rubric + Tickets 1–3.** Validates whether the retune + generator fixes also tighten the older personas, or whether they need their own targeted work.
+- [ ] **CIE499 retune coverage check.** v0.3.0 retuned 4 of 10 Orientation questions. Confirm whether the remaining 6 need the same mechanism-bar treatment, or whether they're already calibrated.
 
 ## Licensing / Assessment Caps
 
