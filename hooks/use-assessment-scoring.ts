@@ -176,7 +176,7 @@ export function useAssessmentScoring() {
       setT3QuestionsRaw(data.tier3Questions);
       setScoringStep("waiting_t3");
       setIsScoring(false);
-      return { questions: generated, meta: data.tier3Meta };
+      return { questions: generated };
     } catch (e) {
       console.error("Tier 3 generation error:", e);
       setError(e instanceof Error ? e.message : "Something went wrong");

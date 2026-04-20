@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       questionMessage = await anthropic.messages.create(
         {
           model: "claude-sonnet-4-6",
-          max_tokens: 6000,
+          max_tokens: 4000,
           system: [
             {
               type: "text",
@@ -75,7 +75,6 @@ export async function POST(request: Request) {
     return NextResponse.json({
       performanceSummary,
       tier3Questions: tier3Data.questions,
-      tier3Meta: tier3Data.tier3_meta,
     });
   } catch (e: any) {
     console.error("generate-tier3 error:", e);
