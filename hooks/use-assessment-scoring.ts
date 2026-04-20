@@ -158,13 +158,33 @@ export function useAssessmentScoring() {
         throw new Error("Performance summary unavailable — score Tier 2 first");
       }
 
-      const data = await callApi("generate-tier3", {
+      // Phase 3: split generation — stems first (serial), then rubrics (parallel)
+      const stemsData = await callApi("generate-tier3-stems", {
         performanceSummary: summary,
         orgFluencyContent: orgFluencyRaw,
-        questionPromptTemplate: tier3QuestionTemplate.prompt_template,
+        stemsPromptTemplate: tier3QuestionTemplate.stems_prompt_template,
       });
 
-      const generated: ScenarioQuestion[] = data.tier3Questions.map((q: RawQuestion, i: number) => ({
+      const stems = stemsData.stems as Array<Omit<RawQuestion, "rubric">>;
+      if (!Array.isArray(stems) || stems.length === 0) {
+        throw new Error("Stem generation returned no questions");
+      }
+
+      const rubricResults = await Promise.all(
+        stems.map((stem) =>
+          callApi("generate-tier3-rubric", {
+            stem,
+            rubricPromptTemplate: tier3QuestionTemplate.rubric_prompt_template,
+          }),
+        ),
+      );
+
+      const fullQuestions: RawQuestion[] = stems.map((stem, i) => ({
+        ...(stem as RawQuestion),
+        rubric: rubricResults[i].rubric,
+      }));
+
+      const generated: ScenarioQuestion[] = fullQuestions.map((q, i) => ({
         id: q.id,
         sequence: i + 1,
         label: `Scenario ${i + 1} of 5`,
@@ -173,7 +193,7 @@ export function useAssessmentScoring() {
       }));
 
       setT3Questions(generated);
-      setT3QuestionsRaw(data.tier3Questions);
+      setT3QuestionsRaw(fullQuestions);
       setScoringStep("waiting_t3");
       setIsScoring(false);
       return { questions: generated };
