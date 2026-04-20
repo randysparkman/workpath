@@ -184,7 +184,7 @@ export function useAssessmentFlow(urlSlug?: string) {
     }
   }, [scoring.scoringStep, scoring.profile, selectedContext]);
 
-  const showHeader = screen !== "welcome" && screen !== "name_input" && !screen.startsWith("analyzing");
+  const showHeader = screen !== "welcome" && !screen.startsWith("analyzing");
 
   const getBackLabel = useCallback(() => {
     const adjustScreens = ["playback", "transition1", "tier1", "transition2", "tier2", "transition3", "tier3", "complete"];
