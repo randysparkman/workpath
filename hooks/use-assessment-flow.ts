@@ -27,7 +27,6 @@ export type Screen =
   | "analyzing_t2t3"
   | "transition3"
   | "tier3"
-  | "complete"
   | "analyzing_profile"
   | "profile";
 
@@ -187,7 +186,7 @@ export function useAssessmentFlow(urlSlug?: string) {
   const showHeader = screen !== "welcome" && !screen.startsWith("analyzing");
 
   const getBackLabel = useCallback(() => {
-    const adjustScreens = ["playback", "transition1", "tier1", "transition2", "tier2", "transition3", "tier3", "complete"];
+    const adjustScreens = ["playback", "transition1", "tier1", "transition2", "tier2", "transition3", "tier3"];
     return adjustScreens.includes(screen) ? "Adjust answers" : "Back";
   }, [screen]);
 
@@ -227,14 +226,11 @@ export function useAssessmentFlow(urlSlug?: string) {
         if (t3Index > 0) setT3Index(t3Index - 1);
         else setScreen("transition3");
         break;
-      case "complete":
+      case "profile":
         if (scoring.t3Questions.length > 0) {
           setT3Index(scoring.t3Questions.length - 1);
           setScreen("tier3");
         }
-        break;
-      case "profile":
-        setScreen("complete");
         break;
     }
   }, [screen, intakeIndex, t1Index, t2Index, t3Index, tier1Questions.length, tier2Questions.length, scoring.t3Questions.length]);

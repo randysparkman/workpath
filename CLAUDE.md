@@ -83,8 +83,8 @@ git push   # Vercel auto-deploys in ~30 seconds
 
 **Cost:** ~$0.20–0.25 per full assessment (before cache discounts).
 
-### Assessment Flow (14 screens)
-welcome → name_input → intake → playback → transition1 → tier1 → analyzing_t1 → transition2 → tier2 → analyzing_t2t3 → transition3 → tier3 → complete → analyzing_profile → profile
+### Assessment Flow (13 screens)
+welcome → name_input → intake → playback → transition1 → tier1 → analyzing_t1 → transition2 → tier2 → analyzing_t2t3 → transition3 → tier3 → analyzing_profile → profile
 
 ### Database
 - Fresh Supabase project (Postgres only, no edge functions)

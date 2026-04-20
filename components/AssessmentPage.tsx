@@ -11,7 +11,6 @@ import { IntakeScreen } from "@/components/assessment/IntakeScreen";
 import { PlaybackScreen } from "@/components/assessment/PlaybackScreen";
 import { TransitionScreen } from "@/components/assessment/TransitionScreen";
 import { ScenarioScreen } from "@/components/assessment/ScenarioScreen";
-import { AssessmentCompleteScreen } from "@/components/assessment/AssessmentCompleteScreen";
 import { AnalyzingScreen } from "@/components/assessment/AnalyzingScreen";
 import { ProfileScreen } from "@/components/assessment/ProfileScreen";
 import { AppHeader } from "@/components/assessment/AppHeader";
@@ -76,7 +75,7 @@ export default function AssessmentPage({ slug }: AssessmentPageProps) {
           orgName={flow.orgName}
           roleDescription={flow.roleDescription}
           onSaveProgress={
-            flow.resumeCode && flow.screen !== "complete" && flow.screen !== "profile"
+            flow.resumeCode && flow.screen !== "profile"
               ? () => setSaveModalOpen(true)
               : undefined
           }
@@ -231,7 +230,7 @@ export default function AssessmentPage({ slug }: AssessmentPageProps) {
           }
           onNext={() => {
             if (flow.t3Index < flow.t3Questions.length - 1) flow.setT3Index(flow.t3Index + 1);
-            else flow.setScreen("complete");
+            else flow.handleViewProfile();
           }}
           onBack={() => {
             if (flow.t3Index > 0) flow.setT3Index(flow.t3Index - 1);
@@ -239,10 +238,6 @@ export default function AssessmentPage({ slug }: AssessmentPageProps) {
           }}
           tierLabel="Tier 3 — Adaptive"
         />
-      )}
-
-      {flow.screen === "complete" && (
-        <AssessmentCompleteScreen onViewProfile={flow.handleViewProfile} />
       )}
 
       {flow.screen === "analyzing_profile" && (
