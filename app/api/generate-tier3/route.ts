@@ -44,20 +44,17 @@ export async function POST(request: Request) {
         {
           model: "claude-sonnet-4-6",
           max_tokens: 6000,
-          system:
-            "You are an adaptive assessment question generator. Produce structured JSON output only.",
-          messages: [
+          system: [
             {
-              role: "user",
-              content: [
-                {
-                  type: "text",
-                  text: questionPromptTemplate,
-                  cache_control: { type: "ephemeral" },
-                },
-                { type: "text", text: dynamicSuffix },
-              ],
+              type: "text",
+              text:
+                "You are an adaptive assessment question generator. Produce structured JSON output only.\n\n" +
+                questionPromptTemplate,
+              cache_control: { type: "ephemeral" },
             },
+          ],
+          messages: [
+            { role: "user", content: dynamicSuffix },
           ],
         },
         { signal: abort.signal },
