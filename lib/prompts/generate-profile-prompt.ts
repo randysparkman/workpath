@@ -237,6 +237,22 @@ If the overall pattern is inconsistent across tiers:
 If the evidence is stronger on some DOL content areas than others:
 - Note this as a finding. "You evaluated AI output effectively across several scenarios but showed less developed capability when it came to describing how you'd direct AI to produce a deliverable" is actionable information for both the respondent and their employer.
 
+### 3.6.1 Within-Construct Mixed Scoring
+
+A construct can be modally Demonstrating (or modally Developing) at the band level while containing real Developing (or Emerging) signal within it. When a respondent's scored_responses show a mix of levels on the same construct — for example, 11 Demonstrating and 4 Developing scores on Orientation across the 15 responses — that mix is part of the current pattern, not an aspirational frontier.
+
+When you write the dimension detail for a construct with within-construct mixed scoring, you must:
+
+- Describe what the Demonstrating-level responses showed and what the Developing-level (or Emerging-level) responses showed, as two parts of the same current pattern. Both are what the respondent did, not what they might do next.
+- Name the axis along which the split falls. The split is usually meaningful: it may cluster by tier (e.g., "Developing in Tier 1 baseline scenarios, Demonstrating once scenarios carried specific stakes"), by DOL area, by human function, or by scenario type (e.g., "Demonstrating when describing workflows, Developing when articulating mechanisms"). Read the evidence_notes from the mixed scores to find the axis and name it specifically.
+- Anchor the split in evidence. The dimension narrative must let the reader see both patterns — name a scenario or behavior that represents the Demonstrating signal, and name a scenario or behavior that represents the Developing signal.
+
+This instruction takes precedence over ceiling framing (3.5) when the two are in tension on within-construct mixed scoring. Ceiling framing still applies to the next_capabilities section and to the forward-looking language within the dimension detail. But the current pattern — including its Developing signal — must be described as the current pattern, not reframed as "the next opportunity" or relegated to a closing aside.
+
+Do not use editorial framing to minimize within-construct Developing signal. Phrasings that collapse Developing scores into the Demonstrating narrative — "that distinction matters less in practice than in theory," "a narrow observation in an otherwise strong set," "the underpinning that becomes useful later" — are not permitted. The rubric made a judgment when it assigned Developing to those responses. The profile must represent that judgment, not overrule it.
+
+The test: If the respondent read only the dimension detail for this construct, would they come away understanding both what they are doing at Demonstrating level and what they are doing at Developing level on this construct right now? If the Developing signal is absent, implicit, or described as a future state rather than a current one, rewrite.
+
 ### 3.7 Narrative Weight Check
 
 When you draft the profile, re-read it from the respondent's perspective. If the dominant experience of reading the profile is "here's everything you didn't do well enough," the weight is wrong — even if every sentence uses ceiling framing. The "Doing Well" section, the summary, and the dimension details should collectively leave the reader with a clear picture of their demonstrated capability before the "Next Capabilities" section introduces forward-looking opportunity. A Developing respondent is not failing — they have real, working capability that the profile should substantiate. The growth section should feel like a natural next step from a position of strength, not a correction of inadequacy.
@@ -344,7 +360,7 @@ Return a JSON object with this exact structure. Quality standards for each field
   "dimensions": {
     "orientation": {
       "level": "Emerging" | "Developing" | "Demonstrating",
-      "detail": "A 3–5 sentence paragraph in second person ('you'). Describe what the scoring data reveals about this construct in plain, direct language. Anchor in specific response patterns. Use ceiling framing — every developmental point should read as skill expansion, not deficit. You may include one brief editorial moment per dimension where the evidence warrants it, but let demonstrated behavior carry its own weight."
+      "detail": "A 3–5 sentence paragraph in second person ('you'). Describe what the scoring data reveals about this construct in plain, direct language. Anchor in specific response patterns. Use ceiling framing — every developmental point should read as skill expansion, not deficit. You may include one brief editorial moment per dimension where the evidence warrants it, but let demonstrated behavior carry its own weight. When within-construct scores are mixed, follow 3.6.1: the editorial-moment permission does not extend to minimizing Developing signal that exists within the construct. Describe both the Demonstrating and the Developing patterns as part of the current reading."
     },
     "integration": {
       "level": "Emerging" | "Developing" | "Demonstrating",
@@ -359,6 +375,16 @@ Return a JSON object with this exact structure. Quality standards for each field
   "doing_well": [
     "3–5 items. Speak directly to the respondent — use 'you' and 'your.' Each item must be observable in the response evidence, but write it like you're telling someone what you noticed about them, not documenting a finding. Credit role-appropriate behaviors including escalation, policy compliance, and risk identification. It is okay — encouraged — to add a brief note about why something matters."
 
+    // OPENER SPECIFICITY (first item):
+    // The first item in doing_well must open with a respondent-specific observation,
+    // not a template sentence. Generic openers like "You consistently treated AI output
+    // as a starting point" or "You approached AI thoughtfully" could describe anyone —
+    // they default to the template rather than the person. Instead, lead with something
+    // only this respondent did: a specific scenario they handled well, a concrete habit
+    // that recurred in their responses, a domain-specific move they made. The reader
+    // should be able to tell after one sentence that this profile was written about
+    // them and not about "a capable respondent in general."
+    //
     // QUALITY STANDARD for each item:
     // Every item must pass this test: Could someone read this and point to a specific
     // pattern in the respondent's answers that supports it? If not, cut it. But if it
@@ -465,16 +491,18 @@ Before finalizing your output, silently verify:
 
 4. **Narrative weight** — Does the profile lead with capability before introducing growth areas? Would the respondent experience this as primarily affirming with clear next steps, or primarily cataloging shortcomings? If the latter, rebalance.
 
-5. **Role calibration** — Did I credit role-appropriate behaviors like escalation and policy deference? Did I calibrate expectations to the respondent's authority level?
+5. **Within-construct signal integrity** — If any construct has scored_responses showing a mix of levels (for example, some Demonstrating and some Developing on the same construct), does the dimension detail describe both patterns as current? Did I avoid framing the minority signal as "the next opportunity," a philosophical aside, or a distinction that "matters less in practice"? If the split exists in the scoring, it must exist in the narrative.
 
-6. **Individual vs. organizational** — Did I separate what the respondent can act on from what requires organizational investment? Did I avoid framing organizational gaps as individual deficiencies?
+6. **Role calibration** — Did I credit role-appropriate behaviors like escalation and policy deference? Did I calibrate expectations to the respondent's authority level?
 
-7. **Full territory** — Did I reflect the respondent's performance across DOL areas and human functions, not just output evaluation? Did I note the augmentation-vs-automation pattern where evidence supports it?
+7. **Individual vs. organizational** — Did I separate what the respondent can act on from what requires organizational investment? Did I avoid framing organizational gaps as individual deficiencies?
 
-8. **Register check** — Did any sentence read as impressed rather than observed? Did I use "remarkably," "genuinely," "rare," "strongest signal," "highest-leverage," "strategic," "paint a picture," or similar elevated phrasing? If yes, rewrite in plain language.
+8. **Full territory** — Did I reflect the respondent's performance across DOL areas and human functions, not just output evaluation? Did I note the augmentation-vs-automation pattern where evidence supports it?
 
-9. **Sponsor shareability** — Would a skeptical sponsor — an HR director, a faculty member, a workforce developer — read this and find it calibrated to the evidence? Or would they feel the evaluator was impressed rather than rigorous? If any sentence would read as a character reference rather than an assessment, rewrite it.
+9. **Register check** — Did any sentence read as impressed rather than observed? Did I use "remarkably," "genuinely," "rare," "strongest signal," "highest-leverage," "strategic," "paint a picture," or similar elevated phrasing? If yes, rewrite in plain language.
 
-10. **JSON structure** — Does the output conform exactly to the required structure? Is every required field present, including dimension-level detail for all three constructs?
+10. **Sponsor shareability** — Would a skeptical sponsor — an HR director, a faculty member, a workforce developer — read this and find it calibrated to the evidence? Or would they feel the evaluator was impressed rather than rigorous? If any sentence would read as a character reference rather than an assessment, rewrite it.
+
+11. **JSON structure** — Does the output conform exactly to the required structure? Is every required field present, including dimension-level detail for all three constructs?
 
 If any answer is no, revise before outputting.`;
