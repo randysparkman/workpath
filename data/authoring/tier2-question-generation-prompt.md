@@ -1,8 +1,8 @@
 # Tier 2 Question Generation Prompt
 
-**Version:** 0.2.0
+**Version:** 0.3.1
 **Purpose:** Generate 5 scenario-based Tier 2 assessment questions grounded in a specific job-role-profile
-**Used by:** Job-role-profile authoring tool (generation phase)
+**Used by:** Job-role-profile authoring (Claude Chat session using this prompt; a UI wrapper is in backlog)
 **Upstream authority:** AI Readiness Literacy Constitution v0.2.0
 **Companion:** `tier1-question-generation-prompt.md` (generates Tier 1 questions from the same job-role-profile)
 
@@ -81,7 +81,11 @@ Concrete differences:
 
 **Start from the role's actual tasks.** Read the job-role-profile's "Common Tasks" and "What's High-Stakes Here" sections. Every Tier 2 scenario should map to something this person actually does in their work week. Don't invent exotic situations — use the ordinary complexity of their real job.
 
-**Use the Decision Authority section to calibrate upward from Tier 1.** The job-role-profile includes a "Decision Authority and Accountability" section with three bands: routine, judgment-embedded, and escalation. Tier 1 targeted routine decisions and the lower end of judgment-embedded. **Tier 2 should target the upper end of judgment-embedded decisions and the boundary with escalation** — situations where the person's process and workflow choices have real downstream consequences, where they need to think about how AI fits into a task that carries weight. Some Tier 2 questions can place the person at the escalation boundary — situations where they need to decide how to frame an issue they'll bring to someone else, and where AI is part of how they prepare.
+**Use the Decision Authority section to calibrate upward from Tier 1.** The job-role-profile includes a "Decision Authority and Accountability" section with three bands: routine, judgment-embedded, and escalation. Tier 1 targeted routine decisions and the lower end of judgment-embedded. **Tier 2 should target the upper end of judgment-embedded decisions and the boundary with escalation** — situations where the person's process and workflow choices have real downstream consequences, where they need to think about how AI fits into a task that carries weight. Some Tier 2 questions can place the person at the escalation boundary — situations where they need to decide how to frame an issue they'll bring to someone else, and where AI is part of how they prepare. Decision band distribution: A well-calibrated Tier 2 set typically has 3–4 scenarios tagged `judgment-embedded` and 1–2 tagged `escalation`. The `escalation` band should represent the boundary — scenarios where the person's choices clearly extend beyond their normal decision authority. Do not tag more than 2 scenarios as `escalation` in a single Tier 2 set.
+
+**`dol_secondary` discipline.** Default to `null`. Only populate a secondary DOL area when the scenario genuinely activates two distinct DOL areas — not because the question "touches on" another area. A well-designed question usually has one primary DOL area; tagging multiple secondaries dilutes the coverage map rather than enriching it.
+
+**`dol_coverage` format.** Entries must be terse labels with a question reference only — e.g. `"#1 Understand AI Principles (Q3)"`. Do not include rationale, commentary, or test descriptions in these entries. The rationale for which DOL areas are covered and why belongs in `design_rationale`, not in `dol_coverage`.
 
 **Use the consequence pattern to deepen Judgment rubrics.** Tier 1 Judgment rubrics introduced role-specific consequences. Tier 2 Judgment rubrics should go further — not just "is the person aware of consequences" but "does the person's described process account for those consequences?" In Tier 2, Judgment shows up in whether the person's workflow is shaped by the stakes, not just whether they mention the stakes.
 
@@ -112,6 +116,17 @@ Every question gets a 3×3 rubric: three constructs × three levels. Same princi
 6. **Demonstrating means role-appropriate competence.** The bar is not perfection or expert-level workflow design. It's: would a thoughtful professional in this specific role, who works effectively with AI, give a response like this? Calibrate to the role's level of autonomy and complexity as described in the job-role-profile.
 
 7. **Judgment rubrics reflect whether process accounts for stakes.** In Tier 2, Judgment isn't just "do they mention the risk" — it's "does the risk shape how they'd work?" A Demonstrating Judgment response describes a process where the stakes influence the approach: more verification for high-consequence outputs, different handling for sensitive data, adjusted workflow when the audience or downstream impact changes.
+
+8. **Mechanism bar on Orientation descriptors.** Though Orientation is secondary in Tier 2, it is still scored on every question — and the same mechanism-bar discipline from Tier 1 applies. Orientation Demonstrating descriptors must tie observed behavior to the generative mechanism via a causal clause ("because" phrase). Orientation Developing descriptors must explicitly name practical recognition *without* mechanism articulation.
+
+   In Tier 2 scenarios, the Orientation signal often shows up in whether the person's described process reflects an understanding of *why* AI behaves the way it does — not just whether they recognize AI has limits. A person who says "I'd feed the AI the project details, then check the draft" is describing process; a person who says "I'd feed the AI the project details because without them it'll produce a statistical average of professional status-update language that misses what this client actually cares about" is describing process grounded in mechanism. The mechanism bar is what separates these in the Orientation rubric.
+
+   **The pattern to use** (same as Tier 1, adapted for Tier 2's richer scenarios):
+
+   - **Developing:** "Recognizes that [the AI's behavior in this task] and adjusts by [reasonable action], but frames it as [surface observation] rather than articulating the underlying principle — that [mechanism statement]."
+   - **Demonstrating:** "Recognizes that [the AI's behavior] because [mechanism: no access to context outside the prompt / renders what it happened to be given / generates plausible-continuation text] — meaning [implication for the described process]."
+
+   Because Tier 2 scenarios are richer and more contextualized than Tier 1, the mechanism language often ties into *why* the described process has the shape it does. The mechanism explanation answers: why does this process need these specific steps? That's the Orientation signal in a Tier 2 rubric.
 
 ### Complementarity with Tier 1
 
@@ -156,7 +171,7 @@ Return a JSON object matching this structure. Every field is required.
       "sequence": 1,
       "angle": "[short label — e.g., workflow_opportunity, directed_drafting, data_synthesis]",
       "dol_content_area": "[primary DOL area]",
-      "dol_secondary": "[secondary DOL area if applicable, or null]",
+      "dol_secondary": "[secondary DOL area — ONLY if a second DOL area is genuinely activated by this scenario; most questions should be null]",
       "human_function_activated": "[Understand | Express | Ideate | Act]",
       "decision_band": "[routine | judgment-embedded | escalation — which band from the Decision Authority section does this scenario target?]",
       "scenario": "[3-5 sentences. Rich context: task, deliverable, stakeholder, constraints. Deeply grounded in the role.]",
@@ -209,10 +224,15 @@ Return a JSON object matching this structure. Every field is required.
 - [ ] Every rubric descriptor is scenario-specific, not generic
 - [ ] Judgment rubric descriptors show whether the described process accounts for role-specific consequences
 - [ ] Emerging/Developing descriptors use ceiling framing ("does not yet," "has not yet")
+- [ ] Orientation Demonstrating descriptors include a causal clause connecting behavior to generative mechanism (the "because" clause — see rubric principle #8)
+- [ ] Orientation Developing descriptors explicitly name practical recognition without mechanism articulation
 - [ ] Integration rubric is the richest on every question
 - [ ] The 5 Tier 2 questions feel like a natural deepening from Tier 1 — not a repetition, not a leap
 - [ ] Across all 10 questions (Tier 1 + Tier 2), the assessment covers the full DOL territory and all 4 human functions
 - [ ] A person taking this assessment would feel Tier 2 scenarios are closer to their actual daily work than Tier 1
+- [ ] `dol_coverage` entries are terse labels — no commentary or rationale
+- [ ] `dol_secondary` is null for most questions; only populated when a second DOL area is genuinely activated
+- [ ] Decision band distribution is 3–4 `judgment-embedded` + 1–2 `escalation`
 
 ---
 
@@ -233,6 +253,17 @@ TIER 1 QUESTIONS (already generated for this role):
 ## Usage Notes
 
 - This prompt is used at **authoring time**, not runtime. It generates questions that are stored in the job-role-profile `.md` file and served statically during assessments.
-- The generated questions should be reviewed by a human before being finalized. The authoring tool presents them for editing.
-- This prompt **requires** the Tier 1 questions as input. It cannot generate good Tier 2 questions without knowing what Tier 1 already covers. The authoring tool should always generate Tier 1 first, present for review, then generate Tier 2 with the finalized Tier 1 as input.
+- The generated questions should be reviewed by a human before being finalized. Current authoring happens in Claude Chat sessions; a UI wrapper is in backlog but not built. The review step is a human reading the output and editing in place.
+- This prompt **requires** the Tier 1 questions as input. It cannot generate good Tier 2 questions without knowing what Tier 1 already covers. The authoring workflow always generates Tier 1 first, presents for review, then generates Tier 2 with the finalized Tier 1 as input.
 - Tier 3 questions are generated at runtime by the adaptive question generator (`tier3-question-template-v2.json`), which uses evidence from Tiers 1 and 2 to fill gaps. Tier 2 does not need to anticipate Tier 3, but it should leave room — don't try to cover every possible angle. Leave genuine ambiguity and pressure scenarios for Tier 3.
+
+---
+
+## Versioning
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 0.2.0 | ~March 2026 | Pre-existing version. Tier 2/Tier 1 differentiation table, DOL coverage as gate (with #2 and #3 anchors required), 7 rubric principles, complementarity checks, quality checklist. |
+| 0.2.1 | April 2026 | Mirrors Tier 1 v0.2.1 with Tier 2-specific values. Stricter `dol_secondary` discipline, tightened template text, new `dol_coverage` format paragraph, decision band distribution guidance (3–4 `judgment-embedded` + 1–2 `escalation`; max 2 escalation). Three new quality-checklist items. Introduced alongside `regenerate-profile.mjs` in `scripts/`; never synced to `data/authoring/` until the merge in 0.3.1. |
+| 0.3.1 | April 2026 | Merged version that resolves the v0.2.1 data/authoring-vs-scripts drift and adds the mechanism bar. Inherits all v0.2.1 content. Adds rubric principle #8 (mechanism bar on Orientation descriptors) — mirrors Tier 1 §8 but adapted for Tier 2's process-grounded scenarios; mechanism language ties into *why* the described process has its shape. Adds two corresponding quality-checklist items. Updated "authoring tool" references to reflect that a UI wrapper is backlog; current authoring is interactive in Claude Chat. Canonical location now `data/authoring/` only; the `scripts/` copy should be removed in favor of a path reference from `regenerate-profile.mjs`. |
+

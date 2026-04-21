@@ -1,8 +1,8 @@
 # Tier 1 Question Generation Prompt
 
-**Version:** 0.2.0
+**Version:** 0.3.1
 **Purpose:** Generate 5 scenario-based Tier 1 assessment questions grounded in a specific job-role-profile
-**Used by:** Job-role-profile authoring tool (generation phase)
+**Used by:** Job-role-profile authoring (Claude Chat session using this prompt; a UI wrapper is in backlog)
 **Upstream authority:** AI Readiness Literacy Constitution v0.2.0
 
 ---
@@ -56,7 +56,11 @@ The sweet spot: scenarios that are recognizable to this specific role but that p
 
 **Ground them in the role.** Read the job-role-profile carefully. Use the role's actual tasks, tools, vocabulary, and stakes. A medical billing specialist should encounter scenarios about claims and coding, not slide decks and client emails. A general office professional should encounter scenarios about deliverables and stakeholder communications, not patient records and compliance audits.
 
-**Use the Decision Authority section to calibrate.** The job-role-profile includes a "Decision Authority and Accountability" section that describes three bands of decision-making: routine decisions, judgment-embedded decisions, and escalation decisions. For Tier 1, build scenarios primarily around **routine decisions and the lower end of judgment-embedded decisions**. These are the decisions the person makes frequently and owns — they're the natural context for testing whether the person understands what AI is doing when it's part of those decisions. Save the harder judgment-embedded and escalation scenarios for Tier 2 and Tier 3.
+**Use the Decision Authority section to calibrate.** The job-role-profile includes a "Decision Authority and Accountability" section that describes three bands of decision-making: routine decisions, judgment-embedded decisions, and escalation decisions. For Tier 1, build scenarios primarily around **routine decisions and the lower end of judgment-embedded decisions**. These are the decisions the person makes frequently and owns — they're the natural context for testing whether the person understands what AI is doing when it's part of those decisions. Save the harder judgment-embedded and escalation scenarios for Tier 2 and Tier 3. Decision band distribution: A well-calibrated Tier 1 set typically has 3–4 scenarios tagged `routine` and at most 1–2 tagged `judgment-embedded`. Elevate a scenario to `judgment-embedded` only when its specific consequences clearly warrant it. No Tier 1 scenarios should be tagged `escalation` — that band belongs to Tier 2 and Tier 3.
+
+**`dol_secondary` discipline.** Default to `null`. Only populate a secondary DOL area when the scenario genuinely activates two distinct DOL areas — not because the question "touches on" another area. A well-designed question usually has one primary DOL area; tagging multiple secondaries dilutes the coverage map rather than enriching it.
+
+**`dol_coverage` format.** Entries must be terse labels with a question reference only — e.g. `"#1 Understand AI Principles (Q3)"`. Do not include rationale, commentary, or test descriptions in these entries. The rationale for which DOL areas are covered and why belongs in `design_rationale`, not in `dol_coverage`.
 
 **Use the consequence pattern to shape Judgment rubrics.** The Decision Authority section characterizes how errors play out for this role — whether they accumulate gradually (erosion of credibility) or produce discrete traceable events (audit triggers, compliance violations, patient harm). This shapes what the Judgment construct looks for. In a role where errors trigger formal consequences, the rubric should reference those specific consequences. In a role where errors accumulate, the rubric should reference the pattern of erosion.
 
@@ -91,6 +95,22 @@ Every question gets a 3×3 rubric: three constructs (Orientation, Integration, J
 
 7. **Judgment rubrics reference role-specific consequences.** Use the Decision Authority section's consequence characterization to write Judgment descriptors. Don't write generic "errors could be bad" language. Write "submitting an unsupported code could trigger a payer audit" or "an unverified claim in a client report erodes credibility over time" — whatever matches this role's accountability pattern.
 
+8. **Mechanism bar on Orientation descriptors.** Orientation Demonstrating descriptors must tie the observed behavior to the generative mechanism via a causal clause — a "because" phrase explaining *why* the AI produces what it does. Orientation Developing descriptors must explicitly name practical recognition *without* mechanism articulation: the person sees the problem and takes reasonable action, but has not yet connected it to how AI works. Emerging descriptors stay as they are — this rule applies only to Developing and Demonstrating.
+
+   This distinction matters because responses from practical thinkers often show correct behavior without articulated mechanism. A respondent who says "I'd verify it regardless of what the AI says" is demonstrating functional mental model — but if the rubric only rewards explicit explanation, that signal gets underscored. The mechanism bar separates *behavior-recognition* (Developing) from *behavior + mechanism-articulation* (Demonstrating), giving the scoring engine a clear line to draw.
+
+   **The pattern to use:**
+
+   - **Developing:** "Recognizes [the problem] and takes [reasonable action], but frames it as [surface observation] rather than articulating the underlying principle — that [mechanism statement]."
+   - **Demonstrating:** "Recognizes that [the problem] because [the AI generates plausible-continuation text / has no access to context outside the prompt / produces a statistical average of the genre / renders whatever data it happened to use] — meaning [implication for verification or trust]."
+
+   **Example — fabrication-detection scenario:**
+
+   - Developing: "Suspects the numbers might be wrong and would want to check them, but frames this as a general accuracy concern rather than articulating why AI-produced statistics behave this way in the first place: that AI generates plausible numerical continuations rather than retrieving from a database."
+   - Demonstrating: "Recognizes that the specific figures were fabricated by the same mechanism that produced the clean prose, because the AI generates plausible-continuation text rather than retrieving verified data — meaning precision and formatting share no causal connection with accuracy."
+
+   The mechanism language will vary by scenario type. Common patterns: for fabrication scenarios, "plausible-continuation text rather than retrieving verified records"; for input-output scenarios, "AI has no access to context outside the prompt + produces a statistical average of the genre"; for visualization scenarios, "AI renders whatever data it happened to use, with no model of what the data should show."
+
 ### Output Format
 
 Return a JSON object matching this structure. Every field is required.
@@ -123,7 +143,7 @@ Return a JSON object matching this structure. Every field is required.
       "sequence": 1,
       "angle": "[short label — e.g., fabrication_detection, capability_boundaries, task_fit]",
       "dol_content_area": "[primary DOL area, e.g., #4 Evaluate AI Outputs]",
-      "dol_secondary": "[secondary DOL area if applicable, or null]",
+      "dol_secondary": "[secondary DOL area — ONLY if a second DOL area is genuinely activated by this scenario; most questions should be null]",
       "human_function_activated": "[Understand | Express | Ideate | Act]",
       "decision_band": "[routine | judgment-embedded | escalation — which band from the Decision Authority section does this scenario target?]",
       "scenario": "[2-4 sentences the user reads. Grounded in the role. Sets up a specific situation involving AI.]",
@@ -175,9 +195,14 @@ Return a JSON object matching this structure. Every field is required.
 - [ ] Every rubric descriptor is scenario-specific, not generic
 - [ ] Judgment rubric descriptors reference role-specific consequences from the Decision Authority section
 - [ ] Emerging/Developing descriptors use ceiling framing ("does not yet," "has not yet")
+- [ ] Orientation Demonstrating descriptors include a causal clause connecting behavior to generative mechanism (the "because" clause — see rubric principle #8)
+- [ ] Orientation Developing descriptors explicitly name practical recognition without mechanism articulation
 - [ ] Orientation rubric is the richest on every question
 - [ ] The 5 questions feel like a coherent set — they progress naturally and don't repeat
 - [ ] A person taking this assessment would feel the questions are relevant to their actual work
+- [ ] `dol_coverage` entries are terse labels — no commentary or rationale
+- [ ] `dol_secondary` is null for most questions; only populated when a second DOL area is genuinely activated
+- [ ] Decision band distribution is 3–4 `routine` + 1–2 `judgment-embedded`; no `escalation`
 
 ---
 
@@ -195,6 +220,17 @@ JOB-ROLE-PROFILE:
 ## Usage Notes
 
 - This prompt is used at **authoring time**, not runtime. It generates questions that are stored in the job-role-profile `.md` file and served statically during assessments.
-- The generated questions should be reviewed by a human before being finalized. The authoring tool presents them for editing.
+- The generated questions should be reviewed by a human before being finalized. Current authoring happens in Claude Chat sessions; a UI wrapper is in backlog but not built. The review step is a human reading the output and editing in place.
 - The companion prompt (`tier2-question-generation-prompt.md`) generates Tier 2 questions from the same job-role-profile. The two prompts are designed to produce complementary, non-overlapping question sets.
 - Tier 3 questions are generated at runtime by the adaptive question generator (`tier3-question-template-v2.json`), which uses evidence from Tiers 1 and 2 to fill gaps.
+
+---
+
+## Versioning
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 0.2.0 | ~March 2026 | Pre-existing version. Tier 1/Tier 2 distinction table, DOL coverage as gate, 7 rubric principles, quality checklist. |
+| 0.2.1 | April 2026 | Stricter `dol_secondary` discipline (default null; only populate when genuinely dual-activating). Tightened `dol_secondary` template text. New `dol_coverage` format paragraph (terse labels only, no commentary). Decision band distribution guidance (3–4 `routine` + 1–2 `judgment-embedded`; no `escalation`). Three new quality-checklist items for these rules. Introduced alongside `regenerate-profile.mjs` in the `scripts/` location; never synced back to `data/authoring/` until the merge in 0.3.1. |
+| 0.3.1 | April 2026 | Merged version that resolves the v0.2.1 data/authoring-vs-scripts drift and adds the mechanism bar. Inherits all v0.2.1 content (dol_secondary discipline, dol_coverage format, decision band distribution, three checklist items). Adds rubric principle #8 (mechanism bar on Orientation descriptors) with the "because" clause discipline from the CIE499 retune. Adds two corresponding quality-checklist items. Updated "authoring tool" references to reflect that a UI wrapper is backlog; current authoring is interactive in Claude Chat. Canonical location now `data/authoring/` only; the `scripts/` copy should be removed in favor of a path reference from `regenerate-profile.mjs`. |
+

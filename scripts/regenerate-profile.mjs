@@ -25,8 +25,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const MODEL_ID         = 'claude-sonnet-4-6';
 const MAX_TOKENS       = 8000;
-const TIER1_PROMPT     = path.join(__dirname, 'tier1-question-generation-prompt.md');
-const TIER2_PROMPT     = path.join(__dirname, 'tier2-question-generation-prompt.md');
+const TIER1_PROMPT     = path.join(__dirname, '..', 'data', 'authoring', 'tier1-question-generation-prompt.md');
+const TIER2_PROMPT     = path.join(__dirname, '..', 'data', 'authoring', 'tier2-question-generation-prompt.md');
 const OUTPUT_ROOT      = path.join(process.cwd(), 'regeneration-output');
 
 const DOL_AREAS = [

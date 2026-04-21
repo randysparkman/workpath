@@ -47,6 +47,11 @@ workpath/
     AssessmentPage.tsx            # Main page component
     assessment/                   # 17 screen + shared components
   data/                           # Job-role profiles, questions, templates
+    authoring/
+      tier1-question-generation-prompt.md  # v0.3.1 — source of truth for T1 question design
+      tier2-question-generation-prompt.md  # v0.3.1 — source of truth for T2 question design
+      job-role-profile-structure.md        # v0.2.0 — profile file structure spec
+      ai-literacy-framework-v2.md          # AI literacy framework (authoring reference)
   hooks/                          # useAssessmentFlow, useAssessmentScoring
   lib/
     anthropic.ts                  # Shared Anthropic SDK client
@@ -59,9 +64,7 @@ workpath/
   public/
     brochure.html                 # Static brochure (served via rewrite at /brochure)
   scripts/
-    regenerate-profile.mjs        # Authoring tool: regenerates T1/T2 questions for a profile
-    tier1-question-generation-prompt.md  # v0.2.1 — source of truth for T1 question design
-    tier2-question-generation-prompt.md  # v0.2.1 — source of truth for T2 question design
+    regenerate-profile.mjs        # Authoring tool: regenerates T1/T2 questions for a profile (reads prompts from data/authoring/)
   BACKLOG.md                      # Project backlog and pre-launch items
 ```
 
