@@ -67,6 +67,8 @@ workpath/
     brochure.html                 # Static brochure (served via rewrite at /brochure)
   scripts/
     regenerate-profile.mjs        # Authoring tool: regenerates T1/T2 questions for a profile (reads prompts from data/authoring/)
+    run-persona.mjs               # Calibration tool: full agentic persona run (T1→T2→T3→profile) against live API
+    export-pdf.mjs                # Export production-layout PDF from a run-persona output JSON
   BACKLOG.md                      # Project backlog and pre-launch items
 ```
 
