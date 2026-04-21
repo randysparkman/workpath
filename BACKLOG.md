@@ -117,4 +117,5 @@ Recent shipped work (Jasmine post-rubric-retune audit, 2026-04-20):
 ## Tooling & Workflow
 
 - [ ] **Session briefing bundle** — evaluate building a script that generates a zip of CLAUDE.md + BACKLOG.md + a requested file subset for single-upload bootstrap at the start of Claude Chat sessions. Current workflow (pull individual files from the repo) works; this is an optimization if session-start friction becomes an issue.
+- [ ] **No duplicate files within the repo** — codify that `data/authoring/` is canonical for all authoring assets; `scripts/` contains runtime tooling only. In changelog #31 (2026-04-21), `scripts/` had a v0.2.1 copy of the T1/T2 generation prompts while `data/authoring/` was at v0.2.0 — drift from when the prompts were tightened during `regenerate-profile.mjs` development without syncing back. Resolved by deleting the `scripts/` copies and updating the script to read from `data/authoring/`. Convention: no file should exist in two repo locations.
 
