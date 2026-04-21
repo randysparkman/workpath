@@ -114,3 +114,7 @@ Recent shipped work (Jasmine post-rubric-retune audit, 2026-04-20):
 - [ ] Priority 3: generate-tier3 (adaptive question generation) — shrink prompt template, enforce nested rubric schema
 - [ ] Priority 4 (optional): generate-profile — add schema enforcement, keep prose guidance
 
+## Tooling & Workflow
+
+- [ ] **Session briefing bundle** — evaluate building a script that generates a zip of CLAUDE.md + BACKLOG.md + a requested file subset for single-upload bootstrap at the start of Claude Chat sessions. Current workflow (pull individual files from the repo) works; this is an optimization if session-start friction becomes an issue.
+

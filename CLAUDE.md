@@ -7,6 +7,29 @@ WorkPath is Randy Sparkman's AI readiness assessment product. It has two compone
 
 ---
 
+## File Sync Model
+
+The repo at `github.com/randysparkman/workpath` is the single source of truth for all files under active development — job-role-profiles, prompts in `lib/prompts/`, authoring tooling in `data/authoring/`, personas, and anything else that ships to production or is actively edited.
+
+Claude Chat does not mirror these files. Project knowledge is not a reflection of the repo.
+
+When Claude Chat needs a file that lives in the repo, Randy pulls it from the repo and uploads it to the conversation. When Claude Chat modifies a file, output goes back as a changelog for Claude Code to apply in the repo. Claude Code is the sole writer to the repo. This makes staleness structurally impossible: there is one canonical source, one writer, and one direction of flow for edits.
+
+**What Claude Chat project knowledge retains:** documentation snapshots that have no repo analog or are labeled as point-in-time references — specifically:
+
+- `AI-Readiness-Assessment-Design-Documentation.md` (April 11 v1.0)
+- `AI-Readiness-Assessment-Design-Addendum-2026-04-17.md`
+- `design-document-v7.docx`
+- `claude-code-onboarding.md`
+
+These are treated as reference material, not canonical source. When uncertainty arises about current state, pull from the repo rather than trust project knowledge.
+
+**What this means for session start:** Any session involving active work on profiles, prompts, personas, CLAUDE.md, BACKLOG.md, or any other repo-resident file begins with Randy pulling the relevant file(s) from the repo. Typical sessions start with a pull of CLAUDE.md and BACKLOG.md so Claude Chat has operational ground truth.
+
+**Candidate future optimization:** a small script Claude Code can run on demand to generate a "session briefing" bundle — CLAUDE.md, BACKLOG.md, plus a requested subset of other files — zipped for single-upload bootstrap. Not worth building now; worth keeping in backlog.
+
+---
+
 ## Repo Structure
 ```
 workpath/
