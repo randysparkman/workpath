@@ -137,17 +137,17 @@ function drawPlacementRow(activeBand) {
 function drawVerificationBadge(bx, by, bw) {
   const CAP_H = 1.8;
   const PAD_X = 4.5;
-  const PAD_TOP = 5.5;
+  const PAD_TOP = 3.0;
 
   const TITLE_SIZE = 7.5;
   const BODY_SIZE = 8.5;
   const META_SIZE = 7.5;
 
-  const TITLE_TO_BODY_GAP = 3.5;
-  const LINE_H = 5.6;
-  const BEFORE_DIVIDER_GAP = 4.8;
-  const AFTER_DIVIDER_GAP = 3.5;
-  const BOTTOM_PAD = 4.0;
+  const TITLE_TO_BODY_GAP = 2.0;
+  const LINE_H = 4.5;
+  const BEFORE_DIVIDER_GAP = 2.5;
+  const AFTER_DIVIDER_GAP = 2.0;
+  const BOTTOM_PAD = 2.5;
 
   const BODY_LINES = [
     'Structured Scenario Assessment',
@@ -203,7 +203,7 @@ function drawVerificationBadge(bx, by, bw) {
 }
 
 function drawHeaderBlock(showBadge = false) {
-  const BADGE_W = 63;
+  const BADGE_W = 58;
   const BADGE_X = PAGE_W - MARGIN_X - BADGE_W;
 
   doc.setFontSize(18);
@@ -224,8 +224,7 @@ function drawHeaderBlock(showBadge = false) {
   doc.line(MARGIN_X, y, PAGE_W - MARGIN_X, y);
   y += 8;
 
-  // Badge: cap bottom sits exactly at the gold rule line
-  if (showBadge) drawVerificationBadge(BADGE_X, goldRuleY - 1.8, BADGE_W);
+  if (showBadge) drawVerificationBadge(BADGE_X, goldRuleY - 2.4, BADGE_W);
 
   const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   if (name.trim()) drawMetaRow('Prepared for', name.trim());
