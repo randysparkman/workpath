@@ -55,7 +55,6 @@ Steps 1, 3 (structural), and 4 (score-tier2) are landed. Remaining latency lever
 - [ ] Tighten profile summary — currently too verbose, needs to be more concise
 - [ ] Reduce inferred thinking — profile attributes reasoning to the respondent that wasn't explicitly stated; stay closer to what they actually said. _Partially addressed by Ticket 3 (commit `6442717` — doing_well first item must open with respondent-specific observation, not template). Broader prompt pass still warranted._
 - [ ] Build 3–4 new job-role profiles (TBD which roles)
-- [ ] Update `lib/generatePdf.ts` — replace "AI Readiness Profile" references with WorkPath branding
 - [ ] Update `lib/prompts/generate-profile-prompt.ts` — align profile generation language with WorkPath brand voice (see `public/brochure.html` as reference)
 
 ## Calibration & Scoring

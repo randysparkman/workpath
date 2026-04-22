@@ -125,7 +125,7 @@ export async function downloadProfilePdf(
       doc.setFontSize(7.5);
       doc.setTextColor(...TEXT_MUTED);
       doc.setFont("helvetica", "normal");
-      doc.text(`AI Readiness Profile · Confidential · ${i}`, MARGIN_X, PAGE_H - 13);
+      doc.text(`WorkPath Profile · Confidential · ${i}`, MARGIN_X, PAGE_H - 13);
       doc.text("Prototype Version · rsparkman.net", PAGE_W - MARGIN_X, PAGE_H - 13, { align: "right" });
     }
   }
@@ -209,7 +209,9 @@ export async function downloadProfilePdf(
     doc.setFontSize(18);
     doc.setTextColor(...TEXT_MAIN);
     doc.setFont("times", "bold");
-    doc.text("AI Readiness Profile", MARGIN_X, y);
+    const firstName = userName.trim().split(/\s+/)[0];
+    const profileTitle = firstName ? `${firstName}'s WorkPath Profile` : "WorkPath Profile";
+    doc.text(profileTitle, MARGIN_X, y);
     y += 7;
 
     // Subtitle
