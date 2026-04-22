@@ -136,13 +136,13 @@ function drawPlacementRow(activeBand) {
 
 function drawVerificationBadge(bx, by, bw) {
   const CAP_H = 1.8;
-  const LINE_H = 4.5;
+  const LINE_H = 5.2;
   const BODY_LINES = [
     'Structured Scenario Assessment',
     'Role-Specific Rubric',
     '15 Scored Scenarios',
   ];
-  const TOTAL_H = CAP_H + 4.5 + 3 + 3.5 + BODY_LINES.length * LINE_H + 3 + 0.3 + 3.5 + 3 + 3.5;
+  const TOTAL_H = CAP_H + 5 + 3 + 4 + BODY_LINES.length * LINE_H + 4.5 + 0.3 + 4 + 3 + 4;
 
   // Background + border
   doc.setFillColor(...BG_WARM);
@@ -154,39 +154,39 @@ function drawVerificationBadge(bx, by, bw) {
   doc.setFillColor(...BADGE_NAVY);
   doc.rect(bx, by, bw, CAP_H, 'F');
 
-  // "WORKPATH VERIFIED" — navy text in body, below cap
-  let ly = by + CAP_H + 4.5 + 3;
+  // "WORKPATH VERIFIED" — navy text below cap
+  let ly = by + CAP_H + 5 + 3;
   doc.setFontSize(7.5);
   doc.setTextColor(...BADGE_NAVY);
   doc.setFont('helvetica', 'bold');
-  doc.text('WORKPATH VERIFIED', bx + 4, ly);
-  ly += 3.5;
+  doc.text('WORKPATH VERIFIED', bx + 4.5, ly);
+  ly += 4;
 
   // Body lines
-  doc.setFontSize(8);
+  doc.setFontSize(8.5);
   doc.setTextColor(...TEXT_MAIN);
   doc.setFont('helvetica', 'normal');
   for (const line of BODY_LINES) {
-    doc.text(line, bx + 4, ly);
+    doc.text(line, bx + 4.5, ly);
     ly += LINE_H;
   }
 
   // Divider
-  ly += 3;
+  ly += 4.5;
   doc.setDrawColor(217, 212, 204);
   doc.setLineWidth(0.3);
-  doc.line(bx + 4, ly, bx + bw - 4, ly);
-  ly += 3.5;
+  doc.line(bx + 4.5, ly, bx + bw - 4.5, ly);
+  ly += 4;
 
   // Version
-  doc.setFontSize(7);
+  doc.setFontSize(7.5);
   doc.setTextColor(...TEXT_MUTED);
   doc.setFont('helvetica', 'normal');
-  doc.text('Assessment v1.4', bx + 4, ly);
+  doc.text('Assessment v1.4', bx + 4.5, ly);
 }
 
 function drawHeaderBlock(showBadge = false) {
-  const BADGE_W = 56;
+  const BADGE_W = 63;
   const BADGE_X = PAGE_W - MARGIN_X - BADGE_W;
 
   doc.setFontSize(18);
@@ -207,8 +207,8 @@ function drawHeaderBlock(showBadge = false) {
   doc.line(MARGIN_X, y, PAGE_W - MARGIN_X, y);
   y += 8;
 
-  // Badge anchored so its thin cap aligns with the gold rule
-  if (showBadge) drawVerificationBadge(BADGE_X, goldRuleY - 1, BADGE_W);
+  // Badge: cap bottom sits exactly at the gold rule line
+  if (showBadge) drawVerificationBadge(BADGE_X, goldRuleY - 1.8, BADGE_W);
 
   const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   if (name.trim()) drawMetaRow('Prepared for', name.trim());
