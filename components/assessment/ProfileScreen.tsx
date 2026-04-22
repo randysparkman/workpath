@@ -1,4 +1,5 @@
 "use client";
+import { useState, useRef } from "react";
 import { FadeIn } from "./FadeIn";
 import { DownloadIcon } from "./Icons";
 import type { ProfileData } from "@/data/mock-profile";
@@ -146,6 +147,35 @@ export function ProfileScreen({
   assessmentResponses = [],
 }: ProfileScreenProps) {
   const p = profile;
+  const [audioState, setAudioState] = useState<"idle" | "loading" | "playing">("idle");
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  async function handleListenSummary() {
+    if (audioState === "playing") {
+      audioRef.current?.pause();
+      setAudioState("idle");
+      return;
+    }
+    setAudioState("loading");
+    try {
+      const res = await fetch("/api/generate-audio", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: p.summary }),
+      });
+      if (!res.ok) throw new Error("audio generation failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => setAudioState("idle");
+      audio.play();
+      setAudioState("playing");
+    } catch {
+      setAudioState("idle");
+    }
+  }
+
   const firstName = userName.trim().split(/\s+/)[0];
   const profileTitle = firstName
     ? `${firstName}'s WorkPath Profile`
@@ -279,17 +309,50 @@ export function ProfileScreen({
 
       <FadeIn delay={1000}>
         <div className="text-center mt-10 mb-10">
-          <button
-            onClick={() =>
-              downloadProfilePdf(p, userName, orgName, assessmentResponses)
-            }
-            className="py-3 px-7 bg-transparent text-primary border-[1.5px] border-primary rounded-lg font-sans text-[0.88rem] font-medium cursor-pointer tracking-[0.02em] transition-all duration-250 ease-out inline-flex items-center gap-2 hover:bg-primary hover:text-primary-foreground active:scale-[0.97]"
-          >
-            <DownloadIcon />
-            Download PDF
-          </button>
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            <button
+              onClick={() =>
+                downloadProfilePdf(p, userName, orgName, assessmentResponses)
+              }
+              className="py-3 px-7 bg-transparent text-primary border-[1.5px] border-primary rounded-lg font-sans text-[0.88rem] font-medium cursor-pointer tracking-[0.02em] transition-all duration-250 ease-out inline-flex items-center gap-2 hover:bg-primary hover:text-primary-foreground active:scale-[0.97]"
+            >
+              <DownloadIcon />
+              Download PDF
+            </button>
+            <button
+              onClick={handleListenSummary}
+              disabled={audioState === "loading"}
+              className="py-3 px-7 bg-transparent text-primary border-[1.5px] border-primary rounded-lg font-sans text-[0.88rem] font-medium cursor-pointer tracking-[0.02em] transition-all duration-250 ease-out inline-flex items-center gap-2 hover:bg-primary hover:text-primary-foreground active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {audioState === "loading" ? (
+                <>
+                  <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                  </svg>
+                  Generating…
+                </>
+              ) : audioState === "playing" ? (
+                <>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="6" y="4" width="4" height="16" rx="1" />
+                    <rect x="14" y="4" width="4" height="16" rx="1" />
+                  </svg>
+                  Stop
+                </>
+              ) : (
+                <>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  </svg>
+                  Listen to Summary
+                </>
+              )}
+            </button>
+          </div>
           <p className="text-[0.78rem] text-muted-foreground mt-2.5">
-            Saves a formatted PDF to your device
+            Download a formatted PDF · or hear your summary read aloud
           </p>
           <button
             onClick={onReset}
