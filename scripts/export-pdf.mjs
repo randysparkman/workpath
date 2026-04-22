@@ -208,7 +208,7 @@ function drawVerificationBadge(bx, by, bw) {
 }
 
 function drawHeaderBlock(showBadge = false) {
-  const BADGE_W = 58;
+  const BADGE_W = 54;
   const BADGE_X = PAGE_W - MARGIN_X - BADGE_W;
 
   doc.setFontSize(18);
@@ -231,8 +231,8 @@ function drawHeaderBlock(showBadge = false) {
   y += 8;
 
   if (showBadge && badgeImageData) {
-    const badgeH = BADGE_W / 1.404;
-    doc.addImage(badgeImageData, 'PNG', BADGE_X, goldRuleY - 4, BADGE_W, badgeH);
+    const badgeH = BADGE_W / 1.450;
+    doc.addImage(badgeImageData, 'PNG', BADGE_X, goldRuleY - 5, BADGE_W, badgeH);
   }
 
   const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });

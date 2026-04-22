@@ -201,7 +201,7 @@ export async function downloadProfilePdf(
 
   // ── Header block (reusable for appendix) ──
   function drawHeaderBlock(showBadge = false) {
-    const BADGE_W = 58;
+    const BADGE_W = 54;
     const BADGE_X = PAGE_W - MARGIN_X - BADGE_W;
     const headerTopY = y;
 
@@ -227,8 +227,8 @@ export async function downloadProfilePdf(
     y += 8;
 
     if (showBadge && badgeDataUrl) {
-      const badgeH = BADGE_W / 1.404;
-      doc.addImage(badgeDataUrl, "PNG", BADGE_X, goldRuleY - 4, BADGE_W, badgeH);
+      const badgeH = BADGE_W / 1.450;
+      doc.addImage(badgeDataUrl, "PNG", BADGE_X, goldRuleY - 5, BADGE_W, badgeH);
     }
 
     // Metadata rows
