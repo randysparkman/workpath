@@ -43,6 +43,7 @@ function hexToRgb(hex) {
 }
 
 const NAVY          = hexToRgb('#14213d');
+const BADGE_NAVY    = hexToRgb('#0C2D48');
 const GREEN         = hexToRgb('#1b4332');
 const GOLD          = hexToRgb('#c9a227');
 const TEXT_MAIN     = [42,42,42];
@@ -133,30 +134,87 @@ function drawPlacementRow(activeBand) {
   y += 6;
 }
 
-function drawHeaderBlock() {
+function drawVerificationBadge(bx, by, bw) {
+  const STRIP_H = 9;
+  const LINE_H = 4.3;
+  const BODY_LINES = [
+    'Structured Scenario Assessment',
+    'Role-Specific Rubric',
+    '15 Scored Scenarios',
+  ];
+  const TOTAL_H = STRIP_H + 4 + BODY_LINES.length * LINE_H + 3 + 4 + 4;
+
+  doc.setFillColor(...BG_WARM);
+  doc.setDrawColor(216, 212, 206);
+  doc.setLineWidth(0.4);
+  doc.rect(bx, by, bw, TOTAL_H, 'FD');
+
+  doc.setFillColor(...BADGE_NAVY);
+  doc.rect(bx, by, bw, STRIP_H, 'F');
+
+  doc.setFontSize(6.5);
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.text('WORKPATH VERIFIED', bx + bw / 2, by + 6.2, { align: 'center' });
+
+  let ly = by + STRIP_H + 4 + 3;
+  doc.setFontSize(7.5);
+  doc.setTextColor(...TEXT_MAIN);
+  doc.setFont('helvetica', 'normal');
+  for (const line of BODY_LINES) {
+    doc.text(line, bx + 4, ly);
+    ly += LINE_H;
+  }
+
+  doc.setDrawColor(210, 206, 200);
+  doc.setLineWidth(0.3);
+  doc.line(bx + 4, ly + 1, bx + bw - 4, ly + 1);
+
+  doc.setFontSize(7);
+  doc.setTextColor(...TEXT_MUTED);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Assessment v1.4', bx + 4, ly + 5);
+}
+
+function drawHeaderBlock(showBadge = false) {
+  const BADGE_W = 56;
+  const BADGE_X = PAGE_W - MARGIN_X - BADGE_W;
+  const headerStartY = y;
+
+  if (showBadge) drawVerificationBadge(BADGE_X, headerStartY, BADGE_W);
+
   doc.setFontSize(18);
   doc.setTextColor(...TEXT_MAIN);
   doc.setFont('times', 'bold');
   doc.text('AI Readiness Profile', MARGIN_X, y);
   y += 7;
-  if (org) {
-    doc.setFontSize(10);
-    doc.setTextColor(...TEXT_MUTED);
-    doc.setFont('helvetica', 'normal');
-    doc.text(org, MARGIN_X, y);
-    y += 8;
-  } else {
-    y += 4;
-  }
+
+  doc.setFontSize(9);
+  doc.setTextColor(...TEXT_MUTED);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Structured scenario assessment with evidence-based placement', MARGIN_X, y);
+  y += 8;
+
   doc.setDrawColor(...GOLD);
   doc.setLineWidth(2);
   doc.line(MARGIN_X, y, PAGE_W - MARGIN_X, y);
   y += 8;
+
   const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   if (name.trim()) drawMetaRow('Prepared for', name.trim());
   drawMetaRow('Date completed', dateStr);
   drawPlacementRow(profile.band);
-  y += 4;
+
+  doc.setFontSize(7.5);
+  doc.setTextColor(...TEXT_MUTED);
+  doc.setFont('helvetica', 'normal');
+  const noteLines = doc.splitTextToSize(
+    'Placement reflects demonstrated performance across scored scenarios, not self-report.',
+    showBadge ? BADGE_X - MARGIN_X - 6 : CONTENT_W
+  );
+  doc.text(noteLines, MARGIN_X, y);
+  y += noteLines.length * 3.8 + 4;
+
   doc.setDrawColor(...DIVIDER);
   doc.setLineWidth(0.5);
   doc.line(MARGIN_X, y, PAGE_W - MARGIN_X, y);
@@ -228,7 +286,7 @@ function drawConstructCard(name, level, detail) {
 
 // ── Page 1 ───────────────────────────────────────────────────────────────────
 
-drawHeaderBlock();
+drawHeaderBlock(true);
 
 // Summary
 doc.setFontSize(13);
