@@ -40,17 +40,21 @@ const BASE_URL = (process.argv[3] || 'https://wkpath.com').replace(/\/$/, '');
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-async function callApi(endpoint, body) {
+const apiTimings = [];
+
+async function callApi(endpoint, body, label) {
   const url = `${BASE_URL}${endpoint}`;
   const t0 = Date.now();
-  process.stdout.write(`  → POST ${endpoint} ... `);
+  process.stdout.write(`  → POST ${endpoint}${label ? ` [${label}]` : ''} ... `);
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(300_000),
   });
-  const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+  const ms = Date.now() - t0;
+  const elapsed = (ms / 1000).toFixed(1);
+  apiTimings.push({ endpoint, label: label ?? null, ms, ok: res.ok });
   if (!res.ok) {
     console.log(`FAILED (${elapsed}s)`);
     const text = await res.text();
@@ -70,46 +74,86 @@ function extractJsonBlock(md, startMarker, endMarker) {
   return JSON.parse(inner);
 }
 
+function sectionByHeader(md, header) {
+  const start = md.indexOf(header);
+  if (start === -1) return '';
+  const rest = md.slice(start + header.length);
+  const nextHeaderMatch = rest.match(/\n#{1,3}\s/);
+  const end = nextHeaderMatch ? nextHeaderMatch.index : rest.length;
+  return rest.slice(0, end).trim();
+}
+
 function parsePersona(md) {
-  // Extract name and profile slug
-  const nameMatch  = md.match(/\*\*Full name:\*\*\s*(.+)/);
-  const slugMatch  = md.match(/\*\*Profile:\*\*[^\(]+\(([^)]+)\)/);
-  const name       = nameMatch  ? nameMatch[1].trim()  : 'Unknown';
-  const slug       = slugMatch  ? slugMatch[1].trim()  : 'unknown';
+  // ── Name ────────────────────────────────────────────────────────────────────
+  let name = 'Unknown';
+  const nameMatch = md.match(/\*\*Full name:\*\*\s*(.+)/);
+  if (nameMatch) {
+    name = nameMatch[1].trim();
+  } else {
+    const h1Match = md.match(/^#\s+(?:Persona:\s*)?([^—\-\n#]+?)(?:\s*[—\-]|$)/m);
+    if (h1Match) name = h1Match[1].trim();
+  }
 
-  // Extract calibration summary block for T3 response generation
-  const calibStart = md.indexOf('## Calibration Profile');
-  const calibEnd   = md.indexOf('\n## ', calibStart + 1);
-  const calibration = calibStart !== -1
-    ? md.slice(calibStart, calibEnd !== -1 ? calibEnd : undefined).trim()
-    : '';
+  // ── Slug ────────────────────────────────────────────────────────────────────
+  let slug = 'unknown';
+  const slugMatch = md.match(/\*\*Profile:\*\*[^\(]+\(([^)]+)\)/);
+  if (slugMatch) {
+    slug = slugMatch[1].trim();
+  } else {
+    // Look for a known profile name in the header/first paragraphs
+    const known = ['cie499', 'medical-billing', 'front-door', 'general'];
+    const head = md.slice(0, 800).toLowerCase();
+    for (const s of known) {
+      if (head.includes(s)) { slug = s; break; }
+    }
+  }
 
-  // Extract T3 behavior note
+  // ── Calibration / persona summary / T3 behavior ─────────────────────────────
+  const calibration =
+    sectionByHeader(md, '## Calibration Profile') ||
+    sectionByHeader(md, '## Who ' + name.split(' ')[0] + ' is') ||
+    sectionByHeader(md, '## Predicted aggregate profile');
+
+  const personaSummary =
+    sectionByHeader(md, '## Persona Summary') ||
+    sectionByHeader(md, '## Who ' + name.split(' ')[0] + ' is');
+
   const t3Match = md.match(/\*\*Tier 3 behavior:\*\*([^*\n]+(?:\n(?!\*\*)[^\n]+)*)/);
-  const tier3Behavior = t3Match ? t3Match[1].trim() : '';
+  const tier3Behavior = t3Match
+    ? t3Match[1].trim()
+    : sectionByHeader(md, '## How to use this in a calibration run') ||
+      'Stay in persona voice. Match the calibration level demonstrated in T1/T2 — do not suddenly produce Demonstrating-level reasoning that was not present earlier.';
 
-  // Extract persona summary (for prompt context)
-  const summaryStart = md.indexOf('## Persona Summary');
-  const summaryEnd   = md.indexOf('\n## ', summaryStart + 1);
-  const personaSummary = summaryStart !== -1
-    ? md.slice(summaryStart, summaryEnd !== -1 ? summaryEnd : undefined).trim()
-    : '';
-
-  // Parse T1 responses
-  const t1Responses = {};
-  const t1Regex = /\*\*T1-Q(\d+)\*\*[^\n]*\n>\s*"([^"]+)"/g;
-  for (const m of md.matchAll(t1Regex)) {
-    t1Responses[`t1_q${m[1]}`] = m[2].trim();
-  }
-
-  // Parse T2 responses
-  const t2Responses = {};
-  const t2Regex = /\*\*T2-Q(\d+)\*\*[^\n]*\n>\s*"([^"]+)"/g;
-  for (const m of md.matchAll(t2Regex)) {
-    t2Responses[`t2_q${m[1]}`] = m[2].trim();
-  }
+  // ── T1/T2 responses ─────────────────────────────────────────────────────────
+  const t1Responses = parseResponses(md, 1);
+  const t2Responses = parseResponses(md, 2);
 
   return { name, slug, calibration, personaSummary, tier3Behavior, t1Responses, t2Responses };
+}
+
+function parseResponses(md, tier) {
+  const out = {};
+  // Format A: **T1-Q1** ...\n> "response"
+  const regexA = new RegExp(`\\*\\*T${tier}-Q(\\d+)\\*\\*[^\\n]*\\n>\\s*"([^"]+)"`, 'g');
+  for (const m of md.matchAll(regexA)) {
+    out[`t${tier}_q${m[1]}`] = m[2].trim();
+  }
+  if (Object.keys(out).length) return out;
+
+  // Format B: ### T1Q1 — ...\n...\n**Response:**\n\n> line (possibly continued on subsequent > lines)
+  const regexB = new RegExp(`###\\s*T${tier}Q(\\d+)[\\s\\S]*?\\*\\*Response:\\*\\*\\s*\\n+((?:>\\s*[^\\n]*\\n?)+)`, 'g');
+  for (const m of md.matchAll(regexB)) {
+    const qnum = m[1];
+    const block = m[2]
+      .split('\n')
+      .map(line => line.replace(/^>\s?/, '').trim())
+      .filter(Boolean)
+      .join(' ')
+      .replace(/^"(.*)"$/, '$1')
+      .trim();
+    out[`t${tier}_q${qnum}`] = block;
+  }
+  return out;
 }
 
 async function generateT3Responses(persona, stems, rubrics) {
@@ -212,7 +256,7 @@ async function main() {
       callApi('/api/generate-tier3-rubric', {
         stem,
         rubricPromptTemplate: questionTemplate.rubric_prompt_template,
-      }).then(r => ({ id: stem.id, rubric: r.rubric }))
+      }, stem.id).then(r => ({ id: stem.id, rubric: r.rubric }))
     )
   );
   const rubricMap = Object.fromEntries(rubricResults.map(r => [r.id, r.rubric]));
@@ -280,6 +324,7 @@ async function main() {
     t3_scores: t3Scores,
     profile,
     all_scored_responses: allScored,
+    api_timings: apiTimings,
   };
 
   fs.writeFileSync(outPath, JSON.stringify(output, null, 2));
@@ -306,6 +351,27 @@ async function main() {
 
   const totalSec = ((Date.now() - runStart) / 1000).toFixed(1);
   console.log(`\nTotal run time: ${totalSec}s`);
+
+  // API timings breakdown
+  console.log(`\nAPI timings (wall-clock per call):`);
+  const byEndpoint = new Map();
+  for (const t of apiTimings) {
+    if (!byEndpoint.has(t.endpoint)) byEndpoint.set(t.endpoint, []);
+    byEndpoint.get(t.endpoint).push(t);
+  }
+  let apiTotalMs = 0;
+  for (const [endpoint, calls] of byEndpoint) {
+    const sum = calls.reduce((a, c) => a + c.ms, 0);
+    apiTotalMs += sum;
+    if (calls.length === 1) {
+      console.log(`  ${endpoint.padEnd(32)} ${(calls[0].ms / 1000).toFixed(1)}s`);
+    } else {
+      const max = Math.max(...calls.map(c => c.ms));
+      const each = calls.map(c => (c.ms / 1000).toFixed(1) + 's').join(', ');
+      console.log(`  ${endpoint.padEnd(32)} ${calls.length}× [${each}] max ${(max / 1000).toFixed(1)}s sum ${(sum / 1000).toFixed(1)}s`);
+    }
+  }
+  console.log(`  ${'TOTAL (sum of all calls)'.padEnd(32)} ${(apiTotalMs / 1000).toFixed(1)}s`);
   console.log(`\nPerformance Summary:`);
   console.log(`  Orientation: ${performanceSummary?.overall_placement?.orientation_band} (${performanceSummary?.overall_placement?.orientation_confidence} confidence)`);
   console.log(`  Integration: ${performanceSummary?.integration_profile?.modal_level} (${performanceSummary?.integration_profile?.level_quality})`);
