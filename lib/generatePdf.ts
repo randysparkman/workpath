@@ -322,14 +322,14 @@ export async function downloadProfilePdf(
       doc.setFont("helvetica", "normal");
       const descLines = doc.splitTextToSize(roleDescription.trim(), CONTENT_W);
       doc.text(descLines, MARGIN_X, y, { lineHeightFactor: 1.45 });
-      y += descLines.length * 4.2 + 6;
+      y += descLines.length * 4.2 + 11;
     }
 
-    // Thin divider
+    // Thin divider, centered in 22pt breathing room before summary card
     doc.setDrawColor(...DIVIDER);
     doc.setLineWidth(0.5);
     doc.line(MARGIN_X, y, PAGE_W - MARGIN_X, y);
-    y += 6;
+    y += 11;
   }
 
   function drawMetaRow(label: string, value: string) {
