@@ -21,20 +21,38 @@
 
 import fs from 'fs';
 import path from 'path';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'url';
 import Anthropic from '@anthropic-ai/sdk';
+import { createClient } from '@supabase/supabase-js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
 
+// Load .env.local for Supabase env vars (only if not already set)
+const envPath = path.join(ROOT, '.env.local');
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf-8');
+  for (const line of envContent.split('\n')) {
+    const m = line.match(/^([A-Z_][A-Z0-9_]*)=(.*)$/);
+    if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, '');
+  }
+}
+
 // ── Config ────────────────────────────────────────────────────────────────────
 
-const personaFile = process.argv[2];
+// Pass --seed-resume to skip profile generation and instead write an
+// assessment_sessions row at the "complete" screen — outputs a resume code
+// the browser can enter to drive the final steps (profile generation + UI).
+const SEED_RESUME = process.argv.includes('--seed-resume');
+const positionalArgs = process.argv.slice(2).filter((a) => !a.startsWith('--'));
+
+const personaFile = positionalArgs[0];
 if (!personaFile) {
-  console.error('Usage: node scripts/run-persona.mjs <persona-file.md> [base-url]');
+  console.error('Usage: node scripts/run-persona.mjs <persona-file.md> [base-url] [--seed-resume]');
   process.exit(1);
 }
-const BASE_URL = (process.argv[3] || 'https://wkpath.com').replace(/\/$/, '');
+const BASE_URL = (positionalArgs[1] || 'https://wkpath.com').replace(/\/$/, '');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -274,6 +292,91 @@ async function main() {
     questions: t3Questions,
   });
   console.log(`  ✓ ${t3Scores.length} questions scored`);
+
+  // ── Optional: seed a resume session and exit before profile generation ─────
+  if (SEED_RESUME) {
+    console.log('\n--seed-resume set — writing assessment_sessions row and skipping profile generation');
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey  = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !serviceKey) {
+      throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env.local');
+    }
+    const sb = createClient(supabaseUrl, serviceKey);
+
+    // ScenarioQuestion[] is the display-only shape derived from RawQuestion[]
+    const t3QuestionsScenario = t3Questions.map((q, i) => ({
+      id:       q.id,
+      sequence: i + 1,
+      label:    `Tier 3, Q${i + 1}`,
+      scenario: q.scenario,
+      prompt:   q.prompt,
+    }));
+
+    // Reasonable intake placeholders (persona script doesn't run intake)
+    const intakeAnswers = {
+      context:     'employer',
+      role:        'service',
+      exposure:    'occasionally',
+      selfassess:  'comfortable',
+      disposition: 'learn',
+    };
+
+    const state = {
+      screen:               'complete',
+      userName:             persona.name,
+      selectedContextId:    persona.slug,
+      assessmentStartedAt:  new Date().toISOString(),
+      intakeIndex:          4,
+      intakeAnswers,
+      t1Index:              t1Data.questions.length - 1,
+      t1Responses:          persona.t1Responses,
+      t1Scores,
+      t2Index:              t2Data.questions.length - 1,
+      t2Responses:          persona.t2Responses,
+      t2Scores,
+      t3Index:              t3Questions.length - 1,
+      t3Responses,
+      t3Scores,
+      t3Questions:          t3QuestionsScenario,
+      t3QuestionsRaw:       t3Questions,
+    };
+
+    // Generate 6-char resume code (matches lib/session.ts alphabet)
+    const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    const bytes = crypto.randomBytes(6);
+    let resumeCode = '';
+    for (let i = 0; i < 6; i++) resumeCode += ALPHABET[bytes[i] % ALPHABET.length];
+
+    const { error } = await sb
+      .from('assessment_sessions')
+      .upsert(
+        {
+          resume_code: resumeCode,
+          role_profile: persona.slug,
+          state,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'resume_code' },
+      );
+
+    if (error) {
+      console.error('Failed to write assessment_sessions row:', error);
+      process.exit(1);
+    }
+
+    console.log('\n═══════════════════════════════════════════');
+    console.log('RESUME CODE READY');
+    console.log('═══════════════════════════════════════════');
+    console.log(`\nCode:        ${resumeCode}`);
+    console.log(`Persona:     ${persona.name} (${persona.slug})`);
+    console.log(`Resume URL:  http://localhost:3000/?resume=${resumeCode}`);
+    console.log('\nEnter the code on the welcome screen (or open the URL above) to land');
+    console.log('at the "complete" screen with all responses + scores hydrated. Click through');
+    console.log('to trigger profile generation and see the email-me-a-copy affordance.\n');
+
+    return;
+  }
 
   // ── Step 7: Generate profile ────────────────────────────────────────────────
   console.log('\nStep 7: Generate profile');
