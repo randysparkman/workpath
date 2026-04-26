@@ -178,6 +178,7 @@ export function useAssessmentFlow(urlSlug?: string) {
             integration_level: p.dimensions.integration.level,
             judgment_level: p.dimensions.judgment.level,
             assessment_data: assessmentData,
+            completed_at: new Date().toISOString(),
           })
           .then(({ error }) => {
             if (error) console.error("Completion insert failed:", error);
