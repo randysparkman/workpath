@@ -45,6 +45,7 @@ workpath/
       score-tier3/route.ts        # Sonnet — rubric scoring
       generate-tier3/route.ts     # Sonnet — adaptive question generation (cached prompt)
       generate-profile/route.ts   # Sonnet — narrative profile (cached prompt)
+      email-profile/route.ts      # Resend — opt-in email + PDF delivery from profile@wkpath.com
   components/
     AssessmentPage.tsx            # Main page component
     assessment/                   # 17 screen + shared components
@@ -58,7 +59,8 @@ workpath/
   lib/
     anthropic.ts                  # Shared Anthropic SDK client
     supabase.ts                   # Lazy Supabase client (getSupabase())
-    generatePdf.ts                # Client-side jsPDF generation
+    supabase-admin.ts             # Server-side admin client (getSupabaseAdmin()) — service-role key, bypasses RLS
+    generatePdf.ts                # jsPDF generation — `downloadProfilePdf` (browser) and `generateProfilePdfBlob` (for email send)
     parse-ai-json.ts              # JSON extraction from Claude responses
     utils.ts                      # cn() utility
     prompts/
@@ -69,6 +71,7 @@ workpath/
     regenerate-profile.mjs        # Authoring tool: regenerates T1/T2 questions for a profile (reads prompts from data/authoring/)
     run-persona.mjs               # Calibration tool: full agentic persona run (T1→T2→T3→profile) against live API
     export-pdf.mjs                # Export production-layout PDF from a run-persona output JSON
+    test-email-profile.mjs        # Smoke test for /api/email-profile end-to-end (insert row → PDF → Resend → cleanup)
   BACKLOG.md                      # Project backlog and pre-launch items
 ```
 
@@ -94,9 +97,11 @@ git push   # Vercel auto-deploys in ~30 seconds
 ```
 
 ### Environment Variables (Vercel)
-- `ANTHROPIC_API_KEY` — for API routes
+- `ANTHROPIC_API_KEY` — for Claude API routes
 - `NEXT_PUBLIC_SUPABASE_URL` — Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Supabase anon key (insert-only RLS)
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Supabase anon key (insert-only RLS, client-side)
+- `SUPABASE_SERVICE_ROLE_KEY` — Supabase service-role key for server-side UPDATEs (bypasses RLS, used by `/api/email-profile`)
+- `RESEND_API_KEY` — Resend API key for transactional email delivery (verified domain `wkpath.com`)
 
 ---
 
@@ -118,8 +123,20 @@ welcome → name_input → intake → playback → transition1 → tier1 → ana
 
 ### Database
 - Fresh Supabase project (Postgres only, no edge functions)
-- One table: `assessment_completions` (insert-only, anon RLS policy)
-- Client uses lazy `getSupabase()` — returns null if env vars not set
+- One table: `assessment_completions` — anon RLS allows INSERT only; client generates the row's UUID at insert time so no SELECT-after-insert is needed
+- `email` column captured optionally via post-completion UPDATE through `/api/email-profile` (uses service-role key, bypasses RLS)
+- Client uses lazy `getSupabase()` (anon, in `lib/supabase.ts`) — returns null if env vars not set
+- Server-side privileged ops use `getSupabaseAdmin()` (service-role, in `lib/supabase-admin.ts`)
+
+### Email Profile Delivery
+Optional opt-in: users can request a PDF copy of their profile via the "Email me a copy" affordance on the profile screen. Flow:
+1. Client generates PDF blob via `generateProfilePdfBlob()` and base64-encodes it
+2. POST to `/api/email-profile` with `{ completionId, email, pdfBase64, fileName }`
+3. Route validates → UPDATEs row with the email → sends PDF via Resend from `WorkPath <profile@wkpath.com>`
+4. **Capture-first design**: the email is saved to the row even if Resend send fails. Response shape: `{ saved: true, sent: true }` on full success, `{ saved: true, sent: false, error: ... }` on partial.
+5. UI surfaces "Sent ✓ to [email]" or partial-state "Saved — we'll send your PDF shortly"
+
+Smoke test: `node scripts/test-email-profile.mjs` exercises the full loop (insert fake row → generate placeholder PDF → POST → Resend → cleanup) without requiring a full assessment run.
 
 ---
 
