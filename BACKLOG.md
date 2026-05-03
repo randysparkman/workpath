@@ -133,6 +133,26 @@ Recent shipped work (Jasmine post-rubric-retune audit, 2026-04-20):
 ## Framework
 
 - [ ] Revisit the AI literacy framework "constitution" — foundational document defining the dimensions, levels, and underlying theory of AI readiness that the assessment is built on
+- [ ] **Evaluate five common AI-use functions for inclusion in literacy framework.** The front-door job-role-profile (`job-role-profile-front-door.md`) describes five recognizable patterns of how knowledge workers use AI, independent of job setting:
+  1. Looking things up (when search would be slower)
+  2. Thinking something through (second brain)
+  3. Making a first draft (rather than starting from scratch)
+  4. Working through a document or pile of data (faster than careful reading)
+  5. Moving through the administrative/coordinative stream of the week
+
+  These currently live only in the front-door profile's Work Context and Common Tasks sections. They function as a ~500-foot layer of empirical use patterns, sitting below the four human functions (Understand, Express, Ideate, Act) at ~5,000 feet.
+
+  **Question to resolve:** Should the five patterns be incorporated into the AI literacy framework / constitution? If so, in what role:
+  - (a) Descriptive examples that make the four functions concrete
+  - (b) A parallel taxonomy at a different altitude, kept distinct from the four functions
+  - (c) The primary authoring/scoring vocabulary, with the four functions repositioned or retired
+
+  **Dependencies:**
+  - Pressure-test the five against empirical LLM use research (NBER, Anthropic usage data, OpenAI/Ipsos, Epoch, Gallup) before locking — already tracked as backlog item #10
+  - Resolve the lookup-vs-thinking-through boundary (most likely to blur in respondent language) with definitions clean enough to route scenarios in the authoring tool
+  - Likely a v8 design doc decision, not a now decision
+
+  **Status:** Parking lot — revisit alongside #10 (four-functions framework revisit) and the next design doc pass.
 
 ## Save & Resume
 
